@@ -1,6 +1,6 @@
-google
+google:
   clientId: ""
   clientSecret: ""
-github
+github:
   clientId: ""
   clientSecret: ""

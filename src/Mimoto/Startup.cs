@@ -15,16 +15,18 @@ namespace Mimoto
 {
     public class Startup
     {
+        private IConfiguration _config;
+        public Startup(IConfiguration config){
+            _config = config;
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services, IConfiguration config)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.AddIdentityServer();
 
             var auth = services.AddAuthentication();
-
-            var authLoader = new AuthLoader(config);
-
+            var authLoader = new AuthLoader(_config);
             authLoader.AddIfExists("google", section => auth.AddGoogle(options => section.Bind(options)));
             authLoader.AddIfExists("microsoft", section => auth.AddMicrosoftAccount(options => section.Bind(options)));
             authLoader.AddIfExists("facebook", setion => auth.AddFacebook(options => setion.Bind(options)));
