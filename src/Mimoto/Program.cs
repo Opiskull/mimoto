@@ -19,6 +19,14 @@ namespace Mimoto
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config
+                    .AddYamlFile("appsettings.yml", optional: true, reloadOnChange: true)
+                    .AddYamlFile($"appsettings.{hostingContext.HostingEnvironment}.yml", optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables();
+
+            })
                 .UseStartup<Startup>();
     }
 }
