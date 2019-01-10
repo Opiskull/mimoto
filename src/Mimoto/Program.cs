@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
+using System;
 
 namespace Mimoto
 {
@@ -17,16 +15,27 @@ namespace Mimoto
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((hostingContext, config) =>
-            {
-                config
-                    .AddYamlFile("appsettings.yml", optional: true, reloadOnChange: true)
-                    .AddYamlFile($"appsettings.{hostingContext.HostingEnvironment}.yml", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables();
-
-            })
-                .UseStartup<Startup>();
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
+                    .ConfigureAppConfiguration((hostingContext, config) => {
+                        config
+                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+                            .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
+                            .AddEnvironmentVariables();
+                    })
+                    .UseStartup<Startup>()
+                    .UseSerilog((context, configuration) =>
+                    {
+                        configuration
+                            .MinimumLevel.Debug()
+                            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                            .MinimumLevel.Override("System", LogEventLevel.Warning)
+                            .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
+                            .Enrich.FromLogContext()
+                            .WriteTo.File(@"mimoto.log")
+                            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Literate);
+                    });
+        }
     }
 }
