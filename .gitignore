@@ -331,3 +331,4 @@ ASALocalRun/
 
 # Custom excludes
 appsettings.*.json
+*.db
