@@ -63,7 +63,7 @@ namespace Mimoto
 
             if (_env.IsDevelopment())
             {
-                // identityBuilder.AddDeveloperSigningCredential();
+                identityBuilder.AddDeveloperSigningCredential();
             }
             else
             {
@@ -108,6 +108,8 @@ namespace Mimoto
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+            app.UseDefaultFiles();
             app.UseIdentityServer();
             app.UseMvcWithDefaultRoute();
         }

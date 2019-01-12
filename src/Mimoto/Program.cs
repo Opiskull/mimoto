@@ -1,4 +1,5 @@
 ﻿using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
+using System.Linq;
 
 namespace Mimoto
 {
@@ -30,6 +32,33 @@ namespace Mimoto
 
                     var persistedGrantDbContext = scope.ServiceProvider.GetService<PersistedGrantDbContext>();
                     persistedGrantDbContext.Database.Migrate();
+
+                    if (!configurationDbContext.Clients.Any())
+                    {
+                        foreach (var client in Config.GetClients())
+                        {
+                            configurationDbContext.Clients.Add(client.ToEntity());
+                        }
+                        configurationDbContext.SaveChanges();
+                    }
+
+                    if (!configurationDbContext.IdentityResources.Any())
+                    {
+                        foreach (var resource in Config.GetIdentityResources())
+                        {
+                            configurationDbContext.IdentityResources.Add(resource.ToEntity());
+                        }
+                        configurationDbContext.SaveChanges();
+                    }
+
+                    if (!configurationDbContext.ApiResources.Any())
+                    {
+                        foreach (var resource in Config.GetApis())
+                        {
+                            configurationDbContext.ApiResources.Add(resource.ToEntity());
+                        }
+                        configurationDbContext.SaveChanges();
+                    }
                 }
             }
 

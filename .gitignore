@@ -332,3 +332,4 @@ ASALocalRun/
 # Custom excludes
 appsettings.*.json
 *.db
+tempkey.rsa
