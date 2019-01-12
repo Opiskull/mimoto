@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore;
+﻿using IdentityServer4.EntityFramework.DbContexts;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Mimoto.Database;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -12,13 +16,31 @@ namespace Mimoto
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            var host = CreateWebHostBuilder(args).Build();
+
+            var serviceProvider = host.Services;
+            {
+                using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
+                {
+                    var applicationDbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                    applicationDbContext.Database.Migrate();
+
+                    var configurationDbContext = scope.ServiceProvider.GetService<ConfigurationDbContext>();
+                    configurationDbContext.Database.Migrate();
+
+                    var persistedGrantDbContext = scope.ServiceProvider.GetService<PersistedGrantDbContext>();
+                    persistedGrantDbContext.Database.Migrate();
+                }
+            }
+
+            host.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
-                    .ConfigureAppConfiguration((hostingContext, config) => {
+                    .ConfigureAppConfiguration((hostingContext, config) =>
+                    {
                         config
                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
                             .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
