@@ -333,3 +333,4 @@ ASALocalRun/
 appsettings.*.json
 *.db
 tempkey.rsa
+appsettings.*.yml

@@ -71,8 +71,8 @@ namespace Mimoto
                     .ConfigureAppConfiguration((hostingContext, config) =>
                     {
                         config
-                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
-                            .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
+                            .AddYamlFile("appsettings.yml", optional: false, reloadOnChange: false)
+                            .AddYamlFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.yml", optional: true, reloadOnChange: false)
                             .AddEnvironmentVariables();
                     })
                     .UseStartup<Startup>()
