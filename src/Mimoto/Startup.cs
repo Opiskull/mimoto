@@ -26,7 +26,7 @@ namespace Mimoto
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionString = _config.GetConnectionString("DefaultConnection");
+            services.AddMvc();
 
             services
                 .AddDbContext<ApplicationDbContext>(ConfigureDb())
@@ -41,8 +41,6 @@ namespace Mimoto
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
                 options.SlidingExpiration = true;
             });
-
-            services.AddMvc();
 
             var identityBuilder = services.AddIdentityServer()
                 .AddAspNetIdentity<ApplicationUser>()
@@ -68,7 +66,7 @@ namespace Mimoto
                 throw new Exception("need to configure key material");
             }
 
-            services.AddAuthenticationProviders(_config)
+            services.AddExternalAuthentication(_config)
                 .AddIfExists("google", (p, a, c) => a.AddGoogle(p, c))
                 .AddIfExists("facebook", (p, a, c) => a.AddFacebook(p, c))
                 .AddIfExists("microsoft", (p, a, c) => a.AddMicrosoftAccount(p, c))
@@ -82,10 +80,10 @@ namespace Mimoto
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseStaticFiles();
-            app.UseDefaultFiles();
-            app.UseIdentityServer();
-            app.UseMvcWithDefaultRoute();
+            app.UseStaticFiles()
+                .UseDefaultFiles()
+                .UseIdentityServer()
+                .UseMvcWithDefaultRoute();
         }
 
         private Action<DbContextOptionsBuilder> ConfigureDb()

@@ -10,22 +10,7 @@ namespace Mimoto
 {
     public static class Extensions
     {
-        // public static AuthenticationProviderBuilder AddProviderIfExists(this AuthenticationBuilder builder, IConfiguration configuration,
-        //     string provider, Action<string, AuthenticationBuilder, Action<OAuthOptions>> action)
-        // {
-        //     var section = configuration.GetSection($"providers:{provider}");
-        //     if (section.Exists())
-        //     {
-        //         action(provider, builder, options =>
-        //         {
-        //             section.Bind(options);
-        //             options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-        //         });
-        //     }
-        //     return builder;
-        // }
-
-        public static ExternalAuthenticationBuilder AddAuthenticationProviders(this IServiceCollection collection, IConfiguration config)
+        public static ExternalAuthenticationBuilder AddExternalAuthentication(this IServiceCollection collection, IConfiguration config)
         {
             return new ExternalAuthenticationBuilder(collection.AddAuthentication(), config);
         }
