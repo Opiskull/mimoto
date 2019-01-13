@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Mimoto.Database;
 using Mimoto.Models;
 
@@ -63,7 +66,9 @@ namespace Mimoto
             }
             else
             {
-                throw new Exception("need to configure key material");
+                SecurityKey key = new RsaSecurityKey(RSACryptoServiceProvider.Create(512));
+                var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+                identityBuilder.AddSigningCredential(signingCredentials);
             }
 
             services.AddExternalAuthentication(_config)
