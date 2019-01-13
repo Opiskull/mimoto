@@ -1,8 +1,7 @@
 @model Mimoto.Quickstart.Device.DeviceAuthorizationViewModel
 
-<div class="page-header">
-    <div class="row page-header">
-        <div class="col-sm-10">
+    <div class="columns">
+        <div class="column col-sm-10">
             @if (Model.ClientLogoUrl != null)
             {
                 <div class="client-logo"><img src="@Model.ClientLogoUrl"></div>
@@ -16,8 +15,8 @@
 
     @if (Model.ConfirmUserCode)
     {
-        <div class="row">
-            <div class="col-sm-8">
+        <div class="columns">
+            <div class="column col-sm-8">
                 <p>
                     Please confirm that the authorization request quotes the code: "@Model.UserCode".
                 </p>
@@ -25,8 +24,8 @@
         </div>
     }
 
-    <div class="row">
-        <div class="col-sm-8">
+    <div class="columns">
+        <div class="column col-sm-8">
             <partial name="_ValidationSummary" />
 
             <form asp-action="Callback" class="consent-form">
@@ -36,8 +35,8 @@
 
                 @if (Model.IdentityScopes.Any())
                 {
-                    <div class="panel panel-default consent-buttons">
-                        <div class="panel-heading">
+                    <div class="panel">
+                        <div class="panel-header">
                             <span class="glyphicon glyphicon-user"></span>
                             Personal Information
                         </div>
@@ -52,8 +51,8 @@
 
                 @if (Model.ResourceScopes.Any())
                 {
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
+                    <div class="panel">
+                        <div class="panel-header">
                             <span class="glyphicon glyphicon-tasks"></span>
                             Application Access
                         </div>
@@ -81,7 +80,7 @@
                     <button name="button" value="no" class="btn">No, Do Not Allow</button>
                     @if (Model.ClientUrl != null)
                     {
-                        <a class="pull-right btn btn-default" target="_blank" href="@Model.ClientUrl">
+                        <a class="float-right btn" target="_blank" href="@Model.ClientUrl">
                             <span class="glyphicon glyphicon-info-sign"></span>
                             <strong>@Model.ClientName</strong>
                         </a>
