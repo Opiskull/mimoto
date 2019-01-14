@@ -15,9 +15,7 @@
     <title>Mimoto</title>
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
-    <!-- <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" /> -->
     <link rel="stylesheet" href="~/lib/spectre/spectre.min.css" />
-    <!-- <link rel="stylesheet" href="~/css/site.css" /> -->
     <link rel="stylesheet" href="~/css/new-site.css" />
 </head>
 <body>
@@ -28,7 +26,17 @@
         <section class="navbar-section">
             @if(!string.IsNullOrWhiteSpace(name))
             {
-            <a asp-action="Logout" asp-controller="Account">Logout</a>
+            <div class="dropdown">
+                <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
+                    @name <i class="icon icon-caret"></i>
+                </a>
+                <!-- menu component -->
+                <ul class="menu">
+                    <li class="menu-item">
+                        <a asp-action="Logout" asp-controller="Account">Logout</a>
+                    </li>
+                </ul>
+            </div>
             }
         </section>
     </header>
@@ -36,9 +44,6 @@
     <div class="container grid-md">
         @RenderBody()
     </div>
-
-    <!-- <script src="~/lib/jquery/jquery.js"></script>
-    <script src="~/lib/bootstrap/js/bootstrap.js"></script> -->
     @RenderSection("scripts", required: false)
 </body>
 </html>
