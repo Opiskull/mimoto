@@ -16,27 +16,35 @@
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/spectre/spectre.min.css" />
+    <link rel="stylesheet" href="~/lib/spectre/icons.min.css" />
     <link rel="stylesheet" href="~/css/new-site.css" />
 </head>
 <body>
     <header class="main-navbar navbar">
         <section class="navbar-section">
-            <a href="/" class="navbar-brand mr-2">Mimoto</a>
+            <a href="/" class="navbar-brand ml-2">Mimoto</a>
         </section>
         <section class="navbar-section">
             @if(!string.IsNullOrWhiteSpace(name))
             {
-            <div class="dropdown">
+            <div class="dropdown dropdown-right">
                 <a href="#" class="btn btn-link dropdown-toggle" tabindex="0">
                     @name <i class="icon icon-caret"></i>
                 </a>
                 <!-- menu component -->
                 <ul class="menu">
                     <li class="menu-item">
+                        <a asp-action="Index" asp-controller="Grants">Grants</a>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="menu-item">
                         <a asp-action="Logout" asp-controller="Account">Logout</a>
                     </li>
                 </ul>
             </div>
+            }
+            else {
+                <a class="btn btn-link" asp-action="Login" asp-controller="Account">Sign In</a>
             }
         </section>
     </header>

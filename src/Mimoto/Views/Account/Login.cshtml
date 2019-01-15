@@ -1,6 +1,8 @@
 ﻿@model Mimoto.Quickstart.Account.LoginViewModel
 
-        <h1>Login</h1>
+<div class="container grid-xs">
+
+    <h1>Login</h1>
 
     <partial name="_ValidationSummary" />
 
@@ -8,13 +10,12 @@
 
         @if (Model.EnableLocalLogin)
         {
-            <div class="column col-sm-6">
+            <div class="column">
                 <div class="panel">
                     <div class="panel-header">
                         <h3 class="panel-title">Local Login</h3>
                     </div>
                     <div class="panel-body">
-
                         <form asp-route="Login">
                             <input type="hidden" asp-for="ReturnUrl" />
 
@@ -50,26 +51,25 @@
 
         @if (Model.VisibleExternalProviders.Any())
         {
-            <div class="column col-md-6 col-sm-6">
+            <div class="column">
                 <div class="panel">
                     <div class="panel-header">
-                        <h3 class="panel-title">External Login</h3>
+                        <h3 class="panel-title">External</h3>
                     </div>
                     <div class="panel-body">
-                        <ul class="list-inline">
-                            @foreach (var provider in Model.VisibleExternalProviders)
-                            {
-                                <li>
-                                    <a class="btn"
-                                       asp-controller="External"
-                                       asp-action="Challenge"
-                                       asp-route-provider="@provider.AuthenticationScheme"
-                                       asp-route-returnUrl="@Model.ReturnUrl">
-                                        @provider.DisplayName
-                                    </a>
-                                </li>
-                            }
-                        </ul>
+                        @foreach (var provider in Model.VisibleExternalProviders)
+                        {
+                            <a class="btn btn-lg btn-block mt-1"
+                                asp-controller="External"
+                                asp-action="Challenge"
+                                asp-route-provider="@provider.AuthenticationScheme"
+                                asp-route-returnUrl="@Model.ReturnUrl">
+                                @provider.DisplayName
+                            </a>
+                        }
+                    </div>
+                    <div class="panel-footer">
+
                     </div>
                 </div>
             </div>
@@ -82,5 +82,6 @@
                 There are no login schemes configured for this client.
             </div>
         }
+        </div>
     </div>
 </div>
