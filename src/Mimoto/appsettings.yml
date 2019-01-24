@@ -1,13 +1,16 @@
 connectionStrings:
   DefaultConnection: "Data Source=identity.db"
 
-providers:
-  google:
-    ClientId: "..."
-    ClientSecret: "..."
-  facebook:
-    ClientId: "..."
-    ClientSecret: "..."
-  microsoft:
-    ClientId: "..."
-    ClientSecret: "..."
+# providers:
+#   google:
+#     ClientId: "..."
+#     ClientSecret: "..."
+#   facebook:
+#     ClientId: "..."
+#     ClientSecret: "..."
+#   microsoft:
+#     ClientId: "..."
+#     ClientSecret: "..."
+#   github:
+#     ClientId: "..."
+#     ClientSecret: "..."
