@@ -5,18 +5,21 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mimoto.Database;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Mimoto.Database.Migrations.ApplicationDb
+namespace Mimoto.Database.ApplicationMigrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190112222254_initial")]
-    partial class initial
+    [Migration("20190124233738_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028");
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
+                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {

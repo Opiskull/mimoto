@@ -97,7 +97,7 @@ namespace Mimoto
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             return (options) =>
             {
-                options.UseSqlite(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                options.UseNpgsql(connectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
             };
         }
     }
