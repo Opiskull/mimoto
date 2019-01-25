@@ -4,3 +4,14 @@ services:
   mimoto:
     build: .
     image: opiskull/mimoto:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./appsettings.Development.yml:/app/appsettings.yml
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mimoto
+      POSTGRES_USER: mimoto
+      POSTGRES_DB: mimoto
