@@ -13,9 +13,9 @@ namespace Mimoto.Tests
             //     .GetMethods(BindingFlags.Static | BindingFlags.Public)
             //     .Where(mi => mi.Name == "Where"); 
 
-            var authBuilder = new AuthenticationBuilder(new IServiceProvider());
+            // var authBuilder = new AuthenticationBuilder(new IServiceProvider());
 
-            authBuilder.AddGoogle();
+            // authBuilder.AddGoogle();
         }
     }
 }
