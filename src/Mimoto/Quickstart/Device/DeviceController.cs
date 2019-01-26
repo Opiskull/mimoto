@@ -45,7 +45,9 @@ namespace Mimoto.Quickstart.Device
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery(Name = "user_code")] string userCode)
         {
-            if (string.IsNullOrWhiteSpace(userCode)) return View("UserCodeCapture");
+            if (string.IsNullOrWhiteSpace(userCode)) {
+                return View("UserCodeCapture");
+            }
 
             var vm = await BuildViewModelAsync(userCode);
             if (vm == null) {

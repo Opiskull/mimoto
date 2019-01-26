@@ -8,18 +8,18 @@ namespace Mimoto.Quickstart.Account
 {
     public static class AccountOptions
     {
-        public static bool AllowLocalLogin = false;
-        public static bool AllowRememberLogin = true;
-        public static TimeSpan RememberMeLoginDuration = TimeSpan.FromDays(30);
+        public static readonly bool AllowLocalLogin = false;
+        public static readonly bool AllowRememberLogin = true;
+        public static readonly TimeSpan RememberMeLoginDuration = TimeSpan.FromDays(30);
 
-        public static bool ShowLogoutPrompt = true;
-        public static bool AutomaticRedirectAfterSignOut = true;
+        public static readonly bool ShowLogoutPrompt = true;
+        public static readonly bool AutomaticRedirectAfterSignOut = true;
 
         // specify the Windows authentication scheme being used
         public static readonly string WindowsAuthenticationSchemeName = Microsoft.AspNetCore.Server.IISIntegration.IISDefaults.AuthenticationScheme;
         // if user uses windows auth, should we load the groups from windows
-        public static bool IncludeWindowsGroups = false;
+        public static readonly bool IncludeWindowsGroups = false;
 
-        public static string InvalidCredentialsErrorMessage = "Invalid username or password";
+        public static readonly string InvalidCredentialsErrorMessage = "Invalid username or password";
     }
 }
