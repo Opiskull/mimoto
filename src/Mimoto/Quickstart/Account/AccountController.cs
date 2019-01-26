@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Mimoto.Exceptions;
 using Mimoto.Models;
 using System;
 using System.Linq;
@@ -135,7 +136,7 @@ namespace Mimoto.Quickstart.Account
                     else
                     {
                         // user might have clicked on a malicious link - should be logged
-                        throw new Exception("invalid return URL");
+                        throw new InvalidReturnUrlException("invalid return URL");
                     }
                 }
 

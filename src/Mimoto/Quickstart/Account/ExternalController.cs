@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Mimoto.Exceptions;
 using Mimoto.Models;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace Mimoto.Quickstart.Account
             if (Url.IsLocalUrl(returnUrl) == false && _interaction.IsValidReturnUrl(returnUrl) == false)
             {
                 // user might have clicked on a malicious link - should be logged
-                throw new Exception("invalid return URL");
+                throw new InvalidReturnUrlException("invalid return URL");
             }
 
             if (AccountOptions.WindowsAuthenticationSchemeName == provider)
@@ -91,7 +92,7 @@ namespace Mimoto.Quickstart.Account
             var result = await HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
             if (result?.Succeeded != true)
             {
-                throw new Exception("External authentication error");
+                throw new ExternalAuthenticationException("External authentication error");
             }
 
             // lookup our user and external provider info
