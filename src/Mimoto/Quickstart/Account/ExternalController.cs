@@ -49,12 +49,13 @@ namespace Mimoto.Quickstart.Account
         [HttpGet]
         public async Task<IActionResult> Challenge(string provider, string returnUrl)
         {
-            if (string.IsNullOrEmpty(returnUrl)) {
-                returnUrl = "~/";
+            var returnUri = returnUrl;
+            if (string.IsNullOrEmpty(returnUri)) {
+                returnUri = "~/";
             }
 
             // validate returnUrl - either it is a valid OIDC URL or back to a local page
-            if (Url.IsLocalUrl(returnUrl) == false && _interaction.IsValidReturnUrl(returnUrl) == false)
+            if (Url.IsLocalUrl(returnUri) == false && _interaction.IsValidReturnUrl(returnUri) == false)
             {
                 // user might have clicked on a malicious link - should be logged
                 throw new InvalidReturnUrlException("invalid return URL");
@@ -63,7 +64,7 @@ namespace Mimoto.Quickstart.Account
             if (AccountOptions.WindowsAuthenticationSchemeName == provider)
             {
                 // windows authentication needs special handling
-                return await ProcessWindowsLoginAsync(returnUrl);
+                return await ProcessWindowsLoginAsync(returnUri);
             }
             else
             {
@@ -73,7 +74,7 @@ namespace Mimoto.Quickstart.Account
                     RedirectUri = Url.Action(nameof(Callback)),
                     Items =
                     {
-                        { "returnUrl", returnUrl },
+                        { "returnUrl", returnUri },
                         { "scheme", provider },
                     }
                 };
@@ -191,7 +192,7 @@ namespace Mimoto.Quickstart.Account
             // depending on the external provider, some other claim type might be used
             var userIdClaim = externalUser.FindFirst(JwtClaimTypes.Subject) ??
                               externalUser.FindFirst(ClaimTypes.NameIdentifier) ??
-                              throw new Exception("Unknown userid");
+                              throw new UnknownExternalUserIdException("Unknown userid");
 
             // remove the user id claim so we don't include it as an extra claim if/when we provision the user
             var claims = externalUser.Claims.ToList();
@@ -252,20 +253,20 @@ namespace Mimoto.Quickstart.Account
             };
             var identityResult = await _userManager.CreateAsync(user);
             if (!identityResult.Succeeded) {
-                throw new Exception(identityResult.Errors.First().Description);
+                throw new IdentityException(identityResult.Errors.First().Description);
             }
 
             if (filtered.Any())
             {
                 identityResult = await _userManager.AddClaimsAsync(user, filtered);
                 if (!identityResult.Succeeded) {
-                    throw new Exception(identityResult.Errors.First().Description);
+                    throw new IdentityException(identityResult.Errors.First().Description);
                 }
             }
 
             identityResult = await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, providerUserId, provider));
             if (!identityResult.Succeeded) {
-                throw new Exception(identityResult.Errors.First().Description);
+                throw new IdentityException(identityResult.Errors.First().Description);
             }
 
             return user;
@@ -286,7 +287,7 @@ namespace Mimoto.Quickstart.Account
             var id_token = externalResult.Properties.GetTokenValue("id_token");
             if (id_token != null)
             {
-                localSignInProps.StoreTokens(new[] { new AuthenticationToken { Name = "id_token", Value = id_token } });
+                localSignInProps.StoreTokens(new [] { new AuthenticationToken { Name = "id_token", Value = id_token } });
             }
         }
     }
