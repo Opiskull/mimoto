@@ -218,7 +218,7 @@ namespace Mimoto.Quickstart.Account
                     EnableLocalLogin = false,
                     ReturnUrl = returnUrl,
                     Username = context?.LoginHint,
-                    ExternalProviders = new ExternalProvider[] { new ExternalProvider { AuthenticationScheme = context.IdP } }
+                    ExternalProviders = new [] { new ExternalProvider { AuthenticationScheme = context.IdP } }
                 };
             }
 

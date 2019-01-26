@@ -6,7 +6,7 @@ using System;
 
 namespace Mimoto.Quickstart.Account
 {
-    public class AccountOptions
+    public static class AccountOptions
     {
         public static bool AllowLocalLogin = false;
         public static bool AllowRememberLogin = true;

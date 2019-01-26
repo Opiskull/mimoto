@@ -19,8 +19,8 @@ namespace Mimoto
 {
     public class Startup
     {
-        public readonly IHostingEnvironment _env;
-        public readonly IConfiguration _config;
+        private readonly IHostingEnvironment _env;
+        private readonly IConfiguration _config;
         public Startup(IHostingEnvironment environment, IConfiguration configuration)
         {
             _env = environment;
