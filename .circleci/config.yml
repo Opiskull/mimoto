@@ -9,4 +9,4 @@ jobs:
       - run: dotnet restore
       - run: dotnet build
       - run: dotnet test /p:CoverletOutputFormat=cobertura /p:CollectCoverage=true
-      - run: java -jar ${JAVA_HOME}/bin/codacy-coverage-reporter.jar report -l CSharp -r **/coverage.cobertura.xml
+      - run: for FILE in `ls **/coverage.cobertura.xml`; do java -jar ${JAVA_HOME}/bin/codacy-coverage-reporter.jar report -l CSharp -r "$FILE"; done
