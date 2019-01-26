@@ -10,10 +10,12 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Mimoto
 {
+    [ExcludeFromCodeCoverage]
     public static class Program
     {
         public static void Main(string[] args)
