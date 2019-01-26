@@ -72,7 +72,9 @@ namespace Mimoto.Quickstart.Device
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Callback(DeviceAuthorizationInputModel model)
         {
-            if (model == null) throw new ArgumentNullException(nameof(model));
+            if (model == null) {
+                throw new ArgumentNullException(nameof(model));
+            }
 
             var result = await ProcessConsent(model);
             if (result.HasValidationError) {

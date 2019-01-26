@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Mimoto.Database
 {
-    public class Migrations
+    public static class Migrations
     {
         public static void Migrate(IServiceProvider serviceProvider){            
             using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())

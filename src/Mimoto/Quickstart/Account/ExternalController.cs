@@ -48,7 +48,9 @@ namespace Mimoto.Quickstart.Account
         [HttpGet]
         public async Task<IActionResult> Challenge(string provider, string returnUrl)
         {
-            if (string.IsNullOrEmpty(returnUrl)) returnUrl = "~/";
+            if (string.IsNullOrEmpty(returnUrl)) {
+                returnUrl = "~/";
+            }
 
             // validate returnUrl - either it is a valid OIDC URL or back to a local page
             if (Url.IsLocalUrl(returnUrl) == false && _interaction.IsValidReturnUrl(returnUrl) == false)
@@ -108,8 +110,6 @@ namespace Mimoto.Quickstart.Account
             var additionalLocalClaims = new List<Claim>();
             var localSignInProps = new AuthenticationProperties();
             ProcessLoginCallbackForOidc(result, additionalLocalClaims, localSignInProps);
-            ProcessLoginCallbackForWsFed(result, additionalLocalClaims, localSignInProps);
-            ProcessLoginCallbackForSaml2p(result, additionalLocalClaims, localSignInProps);
 
             // issue authentication cookie for user
             // we must issue the cookie maually, and can't use the SignInManager because
@@ -142,7 +142,7 @@ namespace Mimoto.Quickstart.Account
                 // we will issue the external cookie and then redirect the
                 // user back to the external callback, in essence, treating windows
                 // auth the same as any other external authentication mechanism
-                var props = new AuthenticationProperties()
+                var props = new AuthenticationProperties
                 {
                     RedirectUri = Url.Action("Callback"),
                     Items =
@@ -180,7 +180,7 @@ namespace Mimoto.Quickstart.Account
             }
         }
 
-        private async Task<(ApplicationUser user, string provider, string providerUserId, IEnumerable<Claim> claims)>
+        private async Task<(ApplicationUser, string, string, IEnumerable<Claim>)>
             FindUserFromExternalProviderAsync(AuthenticateResult result)
         {
             var externalUser = result.Principal;
@@ -250,16 +250,22 @@ namespace Mimoto.Quickstart.Account
                 UserName = Guid.NewGuid().ToString(),
             };
             var identityResult = await _userManager.CreateAsync(user);
-            if (!identityResult.Succeeded) throw new Exception(identityResult.Errors.First().Description);
+            if (!identityResult.Succeeded) {
+                throw new Exception(identityResult.Errors.First().Description);
+            }
 
             if (filtered.Any())
             {
                 identityResult = await _userManager.AddClaimsAsync(user, filtered);
-                if (!identityResult.Succeeded) throw new Exception(identityResult.Errors.First().Description);
+                if (!identityResult.Succeeded) {
+                    throw new Exception(identityResult.Errors.First().Description);
+                }
             }
 
             identityResult = await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, providerUserId, provider));
-            if (!identityResult.Succeeded) throw new Exception(identityResult.Errors.First().Description);
+            if (!identityResult.Succeeded) {
+                throw new Exception(identityResult.Errors.First().Description);
+            }
 
             return user;
         }
@@ -281,14 +287,6 @@ namespace Mimoto.Quickstart.Account
             {
                 localSignInProps.StoreTokens(new[] { new AuthenticationToken { Name = "id_token", Value = id_token } });
             }
-        }
-
-        private void ProcessLoginCallbackForWsFed(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)
-        {
-        }
-
-        private void ProcessLoginCallbackForSaml2p(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)
-        {
         }
     }
 }
