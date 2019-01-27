@@ -37,7 +37,7 @@ namespace Mimoto.Tests
         public async Task RevokeConsentFireEventWithRedirect(){
             _interactionService.Setup(i => i.RevokeUserConsentAsync("client1"))
                 .Returns(Task.CompletedTask).Verifiable();
-            _eventService.Setup(e => e.RaiseAsync(new GrantsRevokedEvent("user1","client1")))
+            _eventService.Setup(e => e.RaiseAsync(It.IsAny<GrantsRevokedEvent>()))
                 .Returns(Task.CompletedTask).Verifiable();
             var controller = new GrantsController(_interactionService.Object, _clientStore.Object, _resourceStore.Object, _eventService.Object);
 
@@ -46,7 +46,7 @@ namespace Mimoto.Tests
                 HttpContext = new DefaultHttpContext() { 
                     User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
                         {
-                            new Claim(ClaimTypes.Name,"user1")
+                            new Claim("sub","user1")
                         })
                     )
                 }
@@ -75,36 +75,47 @@ namespace Mimoto.Tests
         }
 
 
-        // [Fact]
-        // public async Task IndexShouldReturn2Models(){      
-        //     _interactionService.Setup(i => i.GetAllUserConsentsAsync())
-        //         .ReturnsAsync(new Consent[]{
-        //             new Consent {
-        //                 ClientId = "client1",
-        //                 Scopes = new [] {"api1"}
-        //             },
-        //             new Consent {
-        //                 ClientId = "client2",
-        //                 Scopes = new [] {"api2"}
-        //             }
-        //         });
+        [Fact]
+        public async Task IndexShouldReturn2Models(){      
+            _interactionService.Setup(i => i.GetAllUserConsentsAsync())
+                .ReturnsAsync(new Consent[]{
+                    new Consent {
+                        ClientId = "client1",
+                        Scopes = new [] {"api1"}
+                    },
+                    new Consent {
+                        ClientId = "client2",
+                        Scopes = new [] {"api2"}
+                    }
+                });
+
+            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new [] { "api1"}))
+                .ReturnsAsync(new [] { 
+                    new IdentityResource { 
+                        DisplayName = "Identity 1",
+                        Name = "identity1"
+                    }
+                });
             
-        //     _resourceStore.Setup(r => r.FindResourcesByScopeAsync(It.IsAny<IEnumerable<string>>()))
-        //         .ReturnsAsync(new Resources {
-        //             ApiResources = new [] { 
-        //                 new ApiResource { DisplayName = "Api 1"}},
-        //             IdentityResources = new [] { 
-        //                 new IdentityResource { DisplayName = "Identity 1"}}
-        //         });
+            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new [] { "api1"}))
+                .ReturnsAsync(new [] { 
+                    new ApiResource {
+                        Scopes = new [] { 
+                            new Scope {
+                                Name = "api1"
+                            }
+                        }
+                    }
+                });
 
-        //     var controller = new GrantsController(_interactionService.Object, _clientStore.Object, _resourceStore.Object, _eventService.Object);
+            var controller = new GrantsController(_interactionService.Object, _clientStore.Object, _resourceStore.Object, _eventService.Object);
 
-        //     var viewResult = await controller.Index();
+            var viewResult = await controller.Index();
 
-        //     var grantsModel = viewResult.As<ViewResult>().ViewData.Model.As<GrantsViewModel>();
+            var grantsModel = viewResult.As<ViewResult>().ViewData.Model.As<GrantsViewModel>();
 
-        //     grantsModel.Grants.Should().NotBeNull();
-        //     grantsModel.Grants.Should().NotBeEmpty().And.HaveCount(1);
-        // }
+            grantsModel.Grants.Should().NotBeNull();
+            grantsModel.Grants.Should().NotBeEmpty().And.HaveCount(1);
+        }
     }
 }
