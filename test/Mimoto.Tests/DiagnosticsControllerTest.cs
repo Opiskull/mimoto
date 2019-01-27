@@ -17,15 +17,15 @@ namespace Mimoto.Tests
 {
     public class DiagnosticsControllerTest {
 
-        private HttpContext _localContext;
-        private HttpContext _remoteContext;
+        private readonly HttpContext _localContext;
+        private readonly HttpContext _remoteContext;
 
         public DiagnosticsControllerTest(){
             _localContext = new DefaultHttpContext { };
-            _localContext.Connection.LocalIpAddress = IPAddress.Parse("127.0.0.1");
-            _localContext.Connection.RemoteIpAddress = IPAddress.Parse("127.0.0.1");
+            _localContext.Connection.LocalIpAddress = IPAddress.Loopback;
+            _localContext.Connection.RemoteIpAddress = IPAddress.Loopback;
             _remoteContext = new DefaultHttpContext();
-            _remoteContext.Connection.LocalIpAddress = IPAddress.Parse("127.0.0.1");
+            _remoteContext.Connection.LocalIpAddress = IPAddress.Loopback;
             _remoteContext.Connection.RemoteIpAddress = IPAddress.Parse("127.1.1.1");
         }
 
@@ -79,5 +79,4 @@ namespace Mimoto.Tests
             diagVM.Clients.Should().Contain("client1");
         }
     }
-
 }
