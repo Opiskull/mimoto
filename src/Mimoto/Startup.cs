@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,6 +18,7 @@ using Mimoto.Models;
 
 namespace Mimoto
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         private readonly IHostingEnvironment _env;
