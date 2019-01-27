@@ -3,6 +3,7 @@
 
 
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +17,7 @@ namespace Mimoto.Quickstart.Diagnostics
     {
         public async Task<IActionResult> Index()
         {
-            var localAddresses = new string[] { "127.0.0.1", HttpContext.Connection.LocalIpAddress.ToString() };
+            var localAddresses = new string[] { IPAddress.Loopback.ToString(), HttpContext.Connection.LocalIpAddress.ToString() };
             if (!localAddresses.Contains(HttpContext.Connection.RemoteIpAddress.ToString()))
             {
                 return NotFound();
