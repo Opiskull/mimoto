@@ -160,6 +160,110 @@ namespace Mimoto.Tests
             result.As<RedirectResult>().Url.Should().Be("returnUrl");
         }
 
+        [Fact]
+        public async Task ProcessConsentInvalid()
+        {
+            var consentModel = new ConsentInputModel();
+            consentModel.Button = "invalid";
+            consentModel.ReturnUrl = "returnUrl";
+            _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
+                .ReturnsAsync(new AuthorizationRequest{ 
+                    ClientId = "client1",
+                    ScopesRequested = new [] { "api1"}
+                });
+            
+            _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
+                .ReturnsAsync(new Client{
+                    Enabled = true
+                });
+
+            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new [] { "api1"}))
+                .ReturnsAsync(new [] { 
+                    new IdentityResource { 
+                        DisplayName = "Identity 1",
+                        Name = "identity1"
+                    }
+                });
+            
+            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new [] { "api1"}))
+                .ReturnsAsync(new [] { 
+                    new ApiResource {
+                        Scopes = new [] { 
+                            new Scope {
+                                Name = "api1"
+                            }
+                        }
+                    }
+                });
+
+            var controller = CreateController();
+            var result = await controller.Index(consentModel);
+
+            result.Should().BeAssignableTo<ViewResult>();
+            result.As<ViewResult>().ViewName.Should().Be("Index");
+            result.As<ViewResult>().Model.Should().BeAssignableTo<ConsentViewModel>();
+            controller.ModelState.ErrorCount.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task ProcessConsentShouldBeYesGranted()
+        {
+            var consentModel = new ConsentInputModel();
+            consentModel.Button = "yes";
+            consentModel.ReturnUrl = "returnUrl";
+            consentModel.ScopesConsented = new [] {"api1"};
+            _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
+                .ReturnsAsync(new AuthorizationRequest{ 
+                    ClientId = "client1",
+                    ScopesRequested = new [] { "api1"}
+                });
+            
+            _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
+                .ReturnsAsync(new Client{
+                    Enabled = true
+                });
+            
+            _eventService.Setup(e => e.RaiseAsync(It.IsAny<ConsentGrantedEvent>()))
+                .Returns(Task.CompletedTask).Verifiable();
+
+            _interactionService.Setup(i => i.GrantConsentAsync(It.IsAny<AuthorizationRequest>(), It.IsAny<ConsentResponse>(), null))
+                .Returns(Task.CompletedTask);
+
+            var controller = CreateController();
+            var result = await controller.Index(consentModel);
+
+            result.Should().BeAssignableTo<RedirectResult>();
+            result.As<RedirectResult>().Url.Should().Be("returnUrl");
+            _eventService.Verify();
+        }
+
+        [Fact]
+        public async Task ProcessConsentShouldBeYesFailed()
+        {
+            var consentModel = new ConsentInputModel();
+            consentModel.Button = "yes";
+            consentModel.ReturnUrl = "returnUrl";
+            _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
+                .ReturnsAsync(new AuthorizationRequest{ 
+                    ClientId = "client1",
+                    ScopesRequested = new [] { "api1"}
+                });
+            
+            _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
+                .ReturnsAsync(new Client{
+                    Enabled = true
+                });
+
+            _interactionService.Setup(i => i.GrantConsentAsync(It.IsAny<AuthorizationRequest>(), It.IsAny<ConsentResponse>(), null))
+                .Returns(Task.CompletedTask);
+
+            var controller = CreateController();
+            var result = await controller.Index(consentModel);
+
+            result.Should().BeAssignableTo<ViewResult>();
+            result.As<ViewResult>().ViewName.Should().Be("Error");
+        }
+
         private ConsentController CreateController(){
             var controller = new ConsentController(_interactionService.Object, _clientStore.Object, 
                                     _resourceStore.Object, _eventService.Object, _logger.Object);
