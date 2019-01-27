@@ -41,7 +41,7 @@ namespace Mimoto.Tests
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync(new AuthorizationRequest{ ClientId = "client1"});
 
-            _clientStore.Setup(c => c.FindEnabledClientByIdAsync("client1"))
+            _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
                 .ReturnsAsync((Client)null);
 
             await ShouldShowError();
