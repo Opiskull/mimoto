@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using FluentAssertions;
+using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
@@ -85,8 +86,9 @@ namespace Mimoto.Tests
                 HttpContext = new DefaultHttpContext { 
                     User = new ClaimsPrincipal(new ClaimsIdentity(new []
                         {
-                            new Claim("sub","user1")
-                        })
+                            new Claim("sub","user1"),
+                            new Claim(JwtClaimTypes.IdentityProvider, "testIdp")
+                        },"someAuth")
                     )
                 }
             };
