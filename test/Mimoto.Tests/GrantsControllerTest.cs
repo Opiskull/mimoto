@@ -41,10 +41,10 @@ namespace Mimoto.Tests
                 .Returns(Task.CompletedTask).Verifiable();
             var controller = new GrantsController(_interactionService.Object, _clientStore.Object, _resourceStore.Object, _eventService.Object);
 
-            controller.ControllerContext = new ControllerContext()
+            controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext() { 
-                    User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+                HttpContext = new DefaultHttpContext { 
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new []
                         {
                             new Claim("sub","user1")
                         })
@@ -78,7 +78,7 @@ namespace Mimoto.Tests
         [Fact]
         public async Task IndexShouldReturn2Models(){      
             _interactionService.Setup(i => i.GetAllUserConsentsAsync())
-                .ReturnsAsync(new Consent[]{
+                .ReturnsAsync(new []{
                     new Consent {
                         ClientId = "client1",
                         Scopes = new [] {"api1"}
