@@ -9,6 +9,7 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Mimoto.Quickstart.Account;
 using Mimoto.Quickstart.Consent;
 using Moq;
 using Xunit;
@@ -144,7 +145,8 @@ namespace Mimoto.Tests
             
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
                 .ReturnsAsync(new Client{
-                    Enabled = true
+                    Enabled = true,
+                    RequirePkce = true
                 });
             
             _eventService.Setup(e => e.RaiseAsync(It.IsAny<ConsentDeniedEvent>()))
@@ -156,8 +158,9 @@ namespace Mimoto.Tests
             var controller = CreateController();
             var result = await controller.Index(consentModel);
 
-            result.Should().BeAssignableTo<RedirectResult>();
-            result.As<RedirectResult>().Url.Should().Be("returnUrl");
+            result.Should().BeAssignableTo<ViewResult>();
+            result.As<ViewResult>().Model.Should().BeAssignableTo<RedirectViewModel>();
+            result.As<ViewResult>().Model.As<RedirectViewModel>().RedirectUrl.Should().Be("returnUrl");
         }
 
         [Fact]
