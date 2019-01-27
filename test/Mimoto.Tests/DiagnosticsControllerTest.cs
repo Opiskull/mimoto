@@ -76,6 +76,7 @@ namespace Mimoto.Tests
 
             var diagVM = viewModel.As<ViewResult>().ViewData.Model.As<DiagnosticsViewModel>();
             diagVM.Should().NotBeNull();
+            diagVM.AuthenticateResult.Should().NotBeNull();
             diagVM.Clients.Should().Contain("client1");
         }
     }
