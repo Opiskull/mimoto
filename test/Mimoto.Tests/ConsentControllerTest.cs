@@ -1,8 +1,12 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentAssertions;
+using IdentityServer4;
+using IdentityServer4.Events;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Mimoto.Quickstart.Consent;
@@ -73,18 +77,20 @@ namespace Mimoto.Tests
 
         [Fact]
         public async Task ShouldDisplayConsentViewModel(){
+            var scopes = new [] { "api1", IdentityServerConstants.StandardScopes.OfflineAccess};
+
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync(new AuthorizationRequest{ 
                     ClientId = "client1",
-                    ScopesRequested = new [] { "api1"}
+                    ScopesRequested = scopes
                 });
 
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
                 .ReturnsAsync(new Client{
-                    Enabled = true
+                    Enabled = true,
                 });
 
-            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new [] { "api1"}))
+            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(scopes))
                 .ReturnsAsync(new [] { 
                     new IdentityResource { 
                         DisplayName = "Identity 1",
@@ -92,7 +98,7 @@ namespace Mimoto.Tests
                     }
                 });
             
-            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new [] { "api1"}))
+            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(scopes))
                 .ReturnsAsync(new [] { 
                     new ApiResource {
                         Scopes = new [] { 
@@ -103,8 +109,7 @@ namespace Mimoto.Tests
                     }
                 });
 
-            var controller = new ConsentController(_interactionService.Object, _clientStore.Object, 
-                    _resourceStore.Object, _eventService.Object, _logger.Object);
+            var controller = CreateController();
 
             var viewResult = await controller.Index("~/");
 
@@ -112,9 +117,67 @@ namespace Mimoto.Tests
             viewResult.As<ViewResult>().Model.Should().BeAssignableTo<ConsentViewModel>();
         }
 
-        private async Task ShouldShowError(){
+        [Fact]
+        public async Task IndexShouldShowError()
+        {
+            _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
+                .ReturnsAsync((AuthorizationRequest)null);
+
+            var controller = CreateController();
+            
+            var result = await controller.Index(new ConsentInputModel());
+
+            result.As<ViewResult>().ViewName.Should().Be("Error");
+        }
+
+        [Fact]
+        public async Task ProcessConsentShouldBeNo()
+        {
+            var consentModel = new ConsentInputModel();
+            consentModel.Button = "no";
+            consentModel.ReturnUrl = "returnUrl";
+            _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
+                .ReturnsAsync(new AuthorizationRequest{ 
+                    ClientId = "client1",
+                    ScopesRequested = new [] { "api1"}
+                });
+            
+            _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
+                .ReturnsAsync(new Client{
+                    Enabled = true
+                });
+            
+            _eventService.Setup(e => e.RaiseAsync(It.IsAny<ConsentDeniedEvent>()))
+                .Returns(Task.CompletedTask).Verifiable();
+
+            _interactionService.Setup(i => i.GrantConsentAsync(It.IsAny<AuthorizationRequest>(), It.IsAny<ConsentResponse>(), null))
+                .Returns(Task.CompletedTask);
+
+            var controller = CreateController();
+            var result = await controller.Index(consentModel);
+
+            result.Should().BeAssignableTo<RedirectResult>();
+            result.As<RedirectResult>().Url.Should().Be("returnUrl");
+        }
+
+        private ConsentController CreateController(){
             var controller = new ConsentController(_interactionService.Object, _clientStore.Object, 
                                     _resourceStore.Object, _eventService.Object, _logger.Object);
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { 
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new []
+                        {
+                            new Claim("sub","user1")
+                        })
+                    )
+                }
+            };
+            return controller;
+        }
+
+        private async Task ShouldShowError(){
+            var controller = CreateController();
 
             var viewResult = await controller.Index("~/");
 
