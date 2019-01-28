@@ -334,3 +334,5 @@ appsettings.*.json
 *.db
 tempkey.rsa
 appsettings.*.yml
+
+coverage.info

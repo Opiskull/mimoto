@@ -36,5 +36,12 @@ namespace Mimoto.Tests
                     )
                 ));
         }
+
+        public override Task<SignInResult> PasswordSignInAsync(string username, string password, bool rememberLogin, bool lockoutOnFailure){
+            if(username == "opi") {
+                return Task.FromResult(SignInResult.Success);
+            }
+            return Task.FromResult(SignInResult.Failed);
+        }
     }
 }

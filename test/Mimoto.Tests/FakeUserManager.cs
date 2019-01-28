@@ -56,5 +56,9 @@ namespace Mimoto.Tests
             return Task.FromResult(IdentityResult.Success);
         }
 
+        public override Task<ApplicationUser> FindByNameAsync(string username){
+            return Task.FromResult(new ApplicationUser());
+        }
+
     }
 }
