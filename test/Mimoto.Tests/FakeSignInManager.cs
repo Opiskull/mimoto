@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -18,5 +19,9 @@ namespace Mimoto.Tests
                     new Mock<ILogger<SignInManager<ApplicationUser>>>().Object,
                     new Mock<IAuthenticationSchemeProvider>().Object)
             { }        
+
+        public override Task SignOutAsync(){
+            return Task.CompletedTask;
+        }
     }
 }
