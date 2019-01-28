@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,11 @@ namespace Mimoto.Tests
             return Task.FromResult(IdentityResult.Success);
         }
 
+        public override Task<IdentityResult> CreateAsync(ApplicationUser user)
+        {
+            return Task.FromResult(IdentityResult.Success);
+        }
+
         public override Task<IdentityResult> AddToRoleAsync(ApplicationUser user, string role)
         {
             return Task.FromResult(IdentityResult.Success);
@@ -35,6 +42,18 @@ namespace Mimoto.Tests
         public override Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
         {
             return Task.FromResult(Guid.NewGuid().ToString());
+        }
+
+        public override Task<ApplicationUser> FindByLoginAsync(string provider, string userId){
+            return Task.FromResult((ApplicationUser)null);
+        }
+
+        public override Task<IdentityResult> AddLoginAsync(ApplicationUser user, UserLoginInfo info){
+            return Task.FromResult(IdentityResult.Success);
+        }
+
+        public override Task<IdentityResult> AddClaimsAsync(ApplicationUser user, IEnumerable<Claim> claims){
+            return Task.FromResult(IdentityResult.Success);
         }
 
     }

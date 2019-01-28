@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +24,17 @@ namespace Mimoto.Tests
 
         public override Task SignOutAsync(){
             return Task.CompletedTask;
+        }
+
+        public override Task<ClaimsPrincipal> CreateUserPrincipalAsync(ApplicationUser user){
+            return Task.FromResult(                        
+                new System.Security.Claims.ClaimsPrincipal(
+                    new ClaimsIdentity(new [] {
+                        new Claim(JwtClaimTypes.Subject, "test1"),
+                        new Claim(JwtClaimTypes.Name, "test1")
+                        }
+                    )
+                ));
         }
     }
 }

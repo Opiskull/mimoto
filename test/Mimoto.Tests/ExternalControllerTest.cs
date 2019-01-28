@@ -1,17 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentAssertions;
+using IdentityModel;
+using IdentityServer4.Configuration;
+using IdentityServer4.Events;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Mimoto.Exceptions;
 using Mimoto.Quickstart.Account;
 using Moq;
 using Xunit;
 
 namespace Mimoto.Tests{
-    public class ExternalControllerTest{
+    public class ExternalControllerTest {
 
         private readonly FakeUserManager _userManager;
         private readonly FakeSignInManager _signInManager;
@@ -51,6 +58,104 @@ namespace Mimoto.Tests{
             challengeResult.Properties.Items.Contains(new KeyValuePair<string, string>("scheme","test"));
         }
 
+        [Fact]
+        public async Task CallbackShouldThrowException(){           
+
+            var controller = createController();
+
+            controller.ControllerContext = new ControllerContext{
+                HttpContext = AuthenticatedHttpContext(AuthenticateResult.Fail(new Exception()))
+            };
+
+            Func<Task> func = async () => await controller.Callback();
+
+            await func.Should().ThrowAsync<ExternalAuthenticationException>();
+        }
+
+        [Fact]
+        public async Task CallbackFindShouldThrowException(){           
+
+            var controller = createController();
+
+            controller.ControllerContext = new ControllerContext{
+                HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
+                    new AuthenticationTicket(
+                        new System.Security.Claims.ClaimsPrincipal(), 
+                        new AuthenticationProperties(),
+                        "test")
+                    )
+                )
+            };
+
+            Func<Task> func = async () => await controller.Callback();
+
+            await func.Should().ThrowAsync<UnknownExternalUserIdException>();
+        }
+
+        [Fact]
+        public async Task CallbackShouldProvisionUserAndRedirect(){         
+
+            _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginSuccessEvent>()))
+                .Returns(Task.CompletedTask); 
+
+            var controller = createController();
+
+            controller.ControllerContext = new ControllerContext{
+                HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
+                    new AuthenticationTicket(
+                        new System.Security.Claims.ClaimsPrincipal(
+                            new ClaimsIdentity(new [] {
+                                new Claim(JwtClaimTypes.Subject, "test1"),
+                                new Claim(JwtClaimTypes.Name, "test1")
+                            }
+                        )), 
+                        new AuthenticationProperties(new Dictionary<string,string>(){
+                            {"scheme","test"},
+                            {"returnUrl","~/asdf"}
+                        }),
+                        "test")
+                    )
+                )
+            };
+
+            var result = await controller.Callback();
+
+            result.Should().BeAssignableTo<RedirectResult>();
+            result.As<RedirectResult>().Url.Should().Be("~/");
+        }
+
+        [Fact]
+        public async Task CallbackShouldProvisionUserAndRedirectToReturnUrl(){         
+            _interaction.Setup(i => i.IsValidReturnUrl("~/asdf")).Returns(true);
+            _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginSuccessEvent>()))
+                .Returns(Task.CompletedTask); 
+
+            var controller = createController();
+
+            controller.ControllerContext = new ControllerContext{
+                HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
+                    new AuthenticationTicket(
+                        new System.Security.Claims.ClaimsPrincipal(
+                            new ClaimsIdentity(new [] {
+                                new Claim(JwtClaimTypes.Subject, "test1"),
+                                new Claim(JwtClaimTypes.Name, "test1")
+                            }
+                        )), 
+                        new AuthenticationProperties(new Dictionary<string,string>(){
+                            {"scheme","test"},
+                            {"returnUrl","~/asdf"}
+                        }),
+                        "test")
+                    )
+                )
+            };
+
+            var result = await controller.Callback();
+
+            result.Should().BeAssignableTo<RedirectResult>();
+            result.As<RedirectResult>().Url.Should().Be("~/asdf");
+        }
+
         private ExternalController createController(){
             var controller = new ExternalController(_userManager, _signInManager, _interaction.Object, _events.Object);
             var url = new Mock<IUrlHelper>();
@@ -59,6 +164,35 @@ namespace Mimoto.Tests{
             url.Setup(u => u.Action(It.IsAny<UrlActionContext>())).Returns("Callback");
             controller.Url = url.Object;
             return controller;
+        }
+
+        private HttpContext AuthenticatedHttpContext(AuthenticateResult result) {
+            var httpContext = new DefaultHttpContext();
+            
+            var authServiceMock = new Mock<IAuthenticationService>();
+            authServiceMock.Setup(a => a.AuthenticateAsync(
+                    It.IsAny<HttpContext>(), It.IsAny<string>())
+                )
+                .ReturnsAsync(result);
+            
+            var authSchemaProvider = new Mock<IAuthenticationSchemeProvider>();
+            authSchemaProvider.Setup(a => a.GetDefaultAuthenticateSchemeAsync())
+                .ReturnsAsync(
+                    (new AuthenticationScheme("idp", "idp", typeof(IAuthenticationHandler))));
+
+            var serviceProvider = new Mock<IServiceProvider>();
+            serviceProvider.Setup(s => s.GetService(typeof(IdentityServerOptions)))
+                .Returns(new IdentityServerOptions());
+            serviceProvider.Setup(s => s.GetService(typeof(ISystemClock)))
+                .Returns(new Mock<ISystemClock>().Object);
+            serviceProvider.Setup(s => s.GetService(typeof(IAuthenticationSchemeProvider)))
+                .Returns(authSchemaProvider.Object);
+            serviceProvider.Setup(s => s.GetService(typeof(IAuthenticationService)))
+                .Returns(authServiceMock.Object);
+            serviceProvider.Setup(s => s.GetService(typeof(ITempDataDictionaryFactory)))
+                .Returns(new Mock<ITempDataDictionaryFactory>().Object);
+            httpContext.RequestServices = serviceProvider.Object;
+            return httpContext;
         }
     }
 }

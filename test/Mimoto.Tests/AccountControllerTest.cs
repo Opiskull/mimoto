@@ -114,7 +114,8 @@ namespace Mimoto.Tests
         public async Task LogoutWithoutUser()
         {
 
-            _interaction.Setup(i => i.GetLogoutContextAsync("blub")).ReturnsAsync(new LogoutRequest("iframeurl", new LogoutMessage()));
+            _interaction.Setup(i => i.GetLogoutContextAsync("blub"))
+                .ReturnsAsync(new LogoutRequest("iframeurl", new LogoutMessage()));
             var user = new Mock<IIdentity>();
             user.SetupGet(x => x.IsAuthenticated).Returns(false);
             user.SetupGet(x => x.Name).Returns("user1");
