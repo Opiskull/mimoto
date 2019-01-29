@@ -5,8 +5,6 @@
 
 mimoto is japanese for identity.
 
-This IdentityServer is written with aspnet core and mainly based on Identity Server 4.
+This IdentityServer is written with aspnet core and mainly based on `IdentityServer4`.
 
-
-
-
+This service will be used as a Identity service in all projects.
