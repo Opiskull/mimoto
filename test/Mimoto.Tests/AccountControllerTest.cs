@@ -216,9 +216,9 @@ namespace Mimoto.Tests
 
             var redirectToAction = await controller.Login("~/");
 
-            var result = redirectToAction.Should().BeAssignableTo<RedirectToActionResult>().As<RedirectToActionResult>();
-            result.ControllerName.Should().Be("External");
-            result.ActionName.Should().Be("Challenge");
+            redirectToAction.Should().BeAssignableTo<RedirectToActionResult>();
+            redirectToAction.As<RedirectToActionResult>().ControllerName.Should().Be("External");
+            redirectToAction.As<RedirectToActionResult>().ActionName.Should().Be("Challenge");
         }
 
         [Fact]
