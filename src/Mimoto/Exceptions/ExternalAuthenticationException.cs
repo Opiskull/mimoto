@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Mimoto.Exceptions
 {
+    [ExcludeFromCodeCoverage]
     [System.Serializable]
     public class ExternalAuthenticationException : System.Exception
     {
