@@ -203,28 +203,8 @@ namespace Mimoto.Quickstart.Consent
             AuthorizationRequest request,
             Client client, Resources resources)
         {
-            var vm = new ConsentViewModel
-            {
-                RememberConsent = model?.RememberConsent ?? true,
-                ScopesConsented = model?.ScopesConsented ?? Enumerable.Empty<string>(),
-
-                ReturnUrl = returnUrl,
-
-                ClientName = client.ClientName ?? client.ClientId,
-                ClientUrl = client.ClientUri,
-                ClientLogoUrl = client.LogoUri,
-                AllowRememberConsent = client.AllowRememberConsent
-            };
-
-            vm.IdentityScopes = resources.IdentityResources.Select(x => ScopeViewModelFactory.CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-            vm.ResourceScopes = resources.ApiResources.SelectMany(x => x.Scopes).Select(x => ScopeViewModelFactory.CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-            if (ConsentOptions.EnableOfflineAccess && resources.OfflineAccess)
-            {
-                vm.ResourceScopes = vm.ResourceScopes.Union(new [] {
-                    ScopeViewModelFactory.GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null)
-                });
-            }
-
+            var vm = ConsentViewModelFactory.CreateConsentViewModel(model,client,resources);
+            vm.ReturnUrl = returnUrl;
             return vm;
         }
     }
