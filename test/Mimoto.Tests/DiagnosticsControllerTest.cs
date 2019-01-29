@@ -15,12 +15,14 @@ using Xunit;
 
 namespace Mimoto.Tests
 {
-    public class DiagnosticsControllerTest {
+    public class DiagnosticsControllerTest
+    {
 
         private readonly HttpContext _localContext;
         private readonly HttpContext _remoteContext;
 
-        public DiagnosticsControllerTest(){
+        public DiagnosticsControllerTest()
+        {
             _localContext = new DefaultHttpContext { };
             _localContext.Connection.LocalIpAddress = IPAddress.Loopback;
             _localContext.Connection.RemoteIpAddress = IPAddress.Loopback;
@@ -30,7 +32,8 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task IndexShouldReturnNotFound(){
+        public async Task IndexShouldReturnNotFound()
+        {
             var controller = new DiagnosticsController();
             controller.ControllerContext = new ControllerContext
             {
@@ -41,10 +44,11 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task IndexShouldReturnDiganosticsViewModel(){
+        public async Task IndexShouldReturnDiganosticsViewModel()
+        {
             var controller = new DiagnosticsController();
             var authProp = new AuthenticationProperties(
-                new Dictionary<string,string> {
+                new Dictionary<string, string> {
                     {"client_list", Base64Url.Encode(Encoding.UTF8.GetBytes("[\"client1\"]"))}
                 }
             );
@@ -60,7 +64,7 @@ namespace Mimoto.Tests
                         "test"
                     )
                 ));
-            
+
             var serviceProvider = new Mock<IServiceProvider>();
             serviceProvider.Setup(s => s.GetService(typeof(IAuthenticationService)))
                 .Returns(authServiceMock.Object);
@@ -68,7 +72,8 @@ namespace Mimoto.Tests
                 .Returns(new Mock<ITempDataDictionaryFactory>().Object);
             _localContext.RequestServices = serviceProvider.Object;
 
-            controller.ControllerContext = new ControllerContext{
+            controller.ControllerContext = new ControllerContext
+            {
                 HttpContext = _localContext
             };
 

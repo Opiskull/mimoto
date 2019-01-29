@@ -17,14 +17,17 @@ using Mimoto.Quickstart.Account;
 using Moq;
 using Xunit;
 
-namespace Mimoto.Tests{
-    public class ExternalControllerTest {
+namespace Mimoto.Tests
+{
+    public class ExternalControllerTest
+    {
 
         private readonly FakeUserManager _userManager;
         private readonly FakeSignInManager _signInManager;
         private readonly Mock<IIdentityServerInteractionService> _interaction;
         private readonly Mock<IEventService> _events;
-        public ExternalControllerTest(){
+        public ExternalControllerTest()
+        {
             _userManager = new FakeUserManager();
             _signInManager = new FakeSignInManager();
             _interaction = new Mock<IIdentityServerInteractionService>();
@@ -38,7 +41,8 @@ namespace Mimoto.Tests{
         {
             var controller = createController();
 
-            Func<Task> action = async () => {
+            Func<Task> action = async () =>
+            {
                 await controller.Challenge("test", "http://localhost");
             };
 
@@ -46,24 +50,27 @@ namespace Mimoto.Tests{
         }
 
         [Fact]
-        public async Task ChallengeShouldChallenge(){
+        public async Task ChallengeShouldChallenge()
+        {
             var controller = createController();
 
-            var result = await controller.Challenge("test",null);
+            var result = await controller.Challenge("test", null);
 
             result.Should().BeAssignableTo<ChallengeResult>();
             var challengeResult = result.As<ChallengeResult>();
             challengeResult.AuthenticationSchemes.Should().Contain("test");
-            challengeResult.Properties.Items.Contains(new KeyValuePair<string, string>("returnUrl","~/"));
-            challengeResult.Properties.Items.Contains(new KeyValuePair<string, string>("scheme","test"));
+            challengeResult.Properties.Items.Contains(new KeyValuePair<string, string>("returnUrl", "~/"));
+            challengeResult.Properties.Items.Contains(new KeyValuePair<string, string>("scheme", "test"));
         }
 
         [Fact]
-        public async Task CallbackShouldThrowException(){           
+        public async Task CallbackShouldThrowException()
+        {
 
             var controller = createController();
 
-            controller.ControllerContext = new ControllerContext{
+            controller.ControllerContext = new ControllerContext
+            {
                 HttpContext = AuthenticatedHttpContext(AuthenticateResult.Fail(new Exception()))
             };
 
@@ -73,14 +80,16 @@ namespace Mimoto.Tests{
         }
 
         [Fact]
-        public async Task CallbackFindShouldThrowException(){           
+        public async Task CallbackFindShouldThrowException()
+        {
 
             var controller = createController();
 
-            controller.ControllerContext = new ControllerContext{
+            controller.ControllerContext = new ControllerContext
+            {
                 HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
                     new AuthenticationTicket(
-                        new System.Security.Claims.ClaimsPrincipal(), 
+                        new System.Security.Claims.ClaimsPrincipal(),
                         new AuthenticationProperties(),
                         "test")
                     )
@@ -93,23 +102,24 @@ namespace Mimoto.Tests{
         }
 
         [Fact]
-        public async Task CallbackShouldProvisionUserAndRedirect(){         
-
+        public async Task CallbackShouldProvisionUserAndRedirect()
+        {
             _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginSuccessEvent>()))
-                .Returns(Task.CompletedTask); 
+                .Returns(Task.CompletedTask);
 
             var controller = createController();
 
-            controller.ControllerContext = new ControllerContext{
+            controller.ControllerContext = new ControllerContext
+            {
                 HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
                     new AuthenticationTicket(
                         new System.Security.Claims.ClaimsPrincipal(
-                            new ClaimsIdentity(new [] {
+                            new ClaimsIdentity(new[] {
                                 new Claim(JwtClaimTypes.Subject, "test1"),
                                 new Claim(JwtClaimTypes.Name, "test1")
                             }
-                        )), 
-                        new AuthenticationProperties(new Dictionary<string,string>(){
+                        )),
+                        new AuthenticationProperties(new Dictionary<string, string>(){
                             {"scheme","test"},
                             {"returnUrl","~/asdf"}
                         }),
@@ -125,23 +135,25 @@ namespace Mimoto.Tests{
         }
 
         [Fact]
-        public async Task CallbackShouldProvisionUserAndRedirectToReturnUrl(){         
+        public async Task CallbackShouldProvisionUserAndRedirectToReturnUrl()
+        {
             _interaction.Setup(i => i.IsValidReturnUrl("~/asdf")).Returns(true);
             _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginSuccessEvent>()))
-                .Returns(Task.CompletedTask); 
+                .Returns(Task.CompletedTask);
 
             var controller = createController();
 
-            controller.ControllerContext = new ControllerContext{
+            controller.ControllerContext = new ControllerContext
+            {
                 HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
                     new AuthenticationTicket(
                         new System.Security.Claims.ClaimsPrincipal(
-                            new ClaimsIdentity(new [] {
+                            new ClaimsIdentity(new[] {
                                 new Claim(JwtClaimTypes.Subject, "test1"),
                                 new Claim(JwtClaimTypes.Name, "test1")
                             }
-                        )), 
-                        new AuthenticationProperties(new Dictionary<string,string>(){
+                        )),
+                        new AuthenticationProperties(new Dictionary<string, string>(){
                             {"scheme","test"},
                             {"returnUrl","~/asdf"}
                         }),
@@ -156,7 +168,8 @@ namespace Mimoto.Tests{
             result.As<RedirectResult>().Url.Should().Be("~/asdf");
         }
 
-        private ExternalController createController(){
+        private ExternalController createController()
+        {
             var controller = new ExternalController(_userManager, _signInManager, _interaction.Object, _events.Object);
             var url = new Mock<IUrlHelper>();
             url.Setup(u => u.IsLocalUrl("http://localhost")).Returns(false);
@@ -166,15 +179,16 @@ namespace Mimoto.Tests{
             return controller;
         }
 
-        private HttpContext AuthenticatedHttpContext(AuthenticateResult result) {
+        private HttpContext AuthenticatedHttpContext(AuthenticateResult result)
+        {
             var httpContext = new DefaultHttpContext();
-            
+
             var authServiceMock = new Mock<IAuthenticationService>();
             authServiceMock.Setup(a => a.AuthenticateAsync(
                     It.IsAny<HttpContext>(), It.IsAny<string>())
                 )
                 .ReturnsAsync(result);
-            
+
             var authSchemaProvider = new Mock<IAuthenticationSchemeProvider>();
             authSchemaProvider.Setup(a => a.GetDefaultAuthenticateSchemeAsync())
                 .ReturnsAsync(

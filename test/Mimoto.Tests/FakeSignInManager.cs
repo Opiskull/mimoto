@@ -20,16 +20,18 @@ namespace Mimoto.Tests
                     new Mock<IOptions<IdentityOptions>>().Object,
                     new Mock<ILogger<SignInManager<ApplicationUser>>>().Object,
                     new Mock<IAuthenticationSchemeProvider>().Object)
-            { }        
+        { }
 
-        public override Task SignOutAsync(){
+        public override Task SignOutAsync()
+        {
             return Task.CompletedTask;
         }
 
-        public override Task<ClaimsPrincipal> CreateUserPrincipalAsync(ApplicationUser user){
-            return Task.FromResult(                        
+        public override Task<ClaimsPrincipal> CreateUserPrincipalAsync(ApplicationUser user)
+        {
+            return Task.FromResult(
                 new System.Security.Claims.ClaimsPrincipal(
-                    new ClaimsIdentity(new [] {
+                    new ClaimsIdentity(new[] {
                         new Claim(JwtClaimTypes.Subject, "test1"),
                         new Claim(JwtClaimTypes.Name, "test1")
                         }
@@ -37,8 +39,10 @@ namespace Mimoto.Tests
                 ));
         }
 
-        public override Task<SignInResult> PasswordSignInAsync(string username, string password, bool rememberLogin, bool lockoutOnFailure){
-            if(username == "opi") {
+        public override Task<SignInResult> PasswordSignInAsync(string username, string password, bool rememberLogin, bool lockoutOnFailure)
+        {
+            if (username == "opi")
+            {
                 return Task.FromResult(SignInResult.Success);
             }
             return Task.FromResult(SignInResult.Failed);

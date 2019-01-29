@@ -9,13 +9,15 @@ namespace Mimoto.Tests
 {
     public class ExtensionsTest
     {
-        public ExtensionsTest(){
-            
+        public ExtensionsTest()
+        {
+
         }
 
         [Fact]
-        public void ShouldFindTestUserJwtClaimTypes(){
-            var result = new [] {
+        public void ShouldFindTestUserJwtClaimTypes()
+        {
+            var result = new[] {
                 new Claim(JwtClaimTypes.GivenName, "test"),
                 new Claim(JwtClaimTypes.FamilyName, "user"),
                 new Claim(JwtClaimTypes.Email, "test@user.com")
@@ -25,8 +27,9 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public void ShouldFindTestUserClaimTypes(){
-            var result = new []{
+        public void ShouldFindTestUserClaimTypes()
+        {
+            var result = new[]{
                 new Claim(ClaimTypes.GivenName, "test"),
                 new Claim(ClaimTypes.Surname, "user"),
                 new Claim(ClaimTypes.Email, "test@user.com")
@@ -36,32 +39,36 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public void ShouldSetFirstName(){
-            var result = new []{
+        public void ShouldSetFirstName()
+        {
+            var result = new[]{
                 new Claim(JwtClaimTypes.GivenName, "test"),
             }.GetNameAndEmailClaims();
             result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Name, "test"));
         }
 
         [Fact]
-        public void ShouldSetLastName(){
-            var result = new []{
+        public void ShouldSetLastName()
+        {
+            var result = new[]{
                 new Claim(JwtClaimTypes.FamilyName, "user"),
             }.GetNameAndEmailClaims();
             result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Name, "user"));
         }
 
         [Fact]
-        public void ShouldSetNameClaimTypes(){
-            var result = new []{
+        public void ShouldSetNameClaimTypes()
+        {
+            var result = new[]{
                 new Claim(ClaimTypes.Name, "user"),
             }.GetNameAndEmailClaims();
             result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Name, "user"));
         }
 
         [Fact]
-        public void ShouldSetNameJwtClaimTypes(){
-            var result = new []{
+        public void ShouldSetNameJwtClaimTypes()
+        {
+            var result = new[]{
                 new Claim(JwtClaimTypes.Name, "user"),
             }.GetNameAndEmailClaims();
             result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Name, "user"));

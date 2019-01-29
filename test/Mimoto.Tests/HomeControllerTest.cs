@@ -18,15 +18,16 @@ namespace Mimoto.Tests
         private readonly IHostingEnvironment _production;
         private readonly Mock<ILogger<HomeController>> _logger;
 
-        public HomeControllerTest(){
+        public HomeControllerTest()
+        {
 
             _identityService = new Mock<IIdentityServerInteractionService>();
             _identityService.Setup(i => i.GetErrorContextAsync("error-1"))
-                .ReturnsAsync(new ErrorMessage{ ErrorDescription = "MyError"});
+                .ReturnsAsync(new ErrorMessage { ErrorDescription = "MyError" });
             _identityService.Setup(i => i.GetErrorContextAsync("wrong-id"))
                 .ReturnsAsync((ErrorMessage)null);
             _logger = new Mock<ILogger<HomeController>>();
-            
+
             _development = Mock.Of<IHostingEnvironment>(h => h.EnvironmentName == "Development");
             _production = Mock.Of<IHostingEnvironment>(h => h.EnvironmentName == "Production");
         }
@@ -34,8 +35,8 @@ namespace Mimoto.Tests
         [Fact]
         public void IndexShouldReturnView()
         {
-            var controller = new HomeController(_identityService.Object,_development, _logger.Object);
-            
+            var controller = new HomeController(_identityService.Object, _development, _logger.Object);
+
             var viewResult = controller.Index();
 
             viewResult.Should().BeOfType<ViewResult>();
@@ -44,17 +45,18 @@ namespace Mimoto.Tests
         [Fact]
         public void IndexShouldReturnNotFound()
         {
-            var controller = new HomeController(_identityService.Object,_production, _logger.Object);
-            
+            var controller = new HomeController(_identityService.Object, _production, _logger.Object);
+
             var viewResult = controller.Index();
 
             viewResult.Should().BeOfType<NotFoundResult>();
         }
 
         [Fact]
-        public async Task ErrorShouldNotBeFound(){
-            var controller = new HomeController(_identityService.Object,_production, _logger.Object);
-            
+        public async Task ErrorShouldNotBeFound()
+        {
+            var controller = new HomeController(_identityService.Object, _production, _logger.Object);
+
             var actionRsult = await controller.Error("wrong-id");
 
             var error = actionRsult.As<ViewResult>().ViewData.Model.As<ErrorViewModel>();
@@ -63,9 +65,10 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task ErrorDescriptionShouldBeNull(){
-            var controller = new HomeController(_identityService.Object,_production, _logger.Object);
-            
+        public async Task ErrorDescriptionShouldBeNull()
+        {
+            var controller = new HomeController(_identityService.Object, _production, _logger.Object);
+
             var actionRsult = await controller.Error("error-1");
 
             var error = actionRsult.As<ViewResult>().ViewData.Model.As<ErrorViewModel>();
@@ -75,9 +78,10 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task ErrorDescriptionShouldBeMyError(){
-            var controller = new HomeController(_identityService.Object,_development, _logger.Object);
-            
+        public async Task ErrorDescriptionShouldBeMyError()
+        {
+            var controller = new HomeController(_identityService.Object, _development, _logger.Object);
+
             var actionRsult = await controller.Error("error-1");
 
             var error = actionRsult.As<ViewResult>().ViewData.Model.As<ErrorViewModel>();

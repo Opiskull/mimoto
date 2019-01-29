@@ -20,10 +20,12 @@ namespace Mimoto.Tests
         private readonly Mock<IResourceStore> _resourceStore;
         private readonly Mock<IEventService> _eventService;
 
-        public GrantsControllerTest(){
+        public GrantsControllerTest()
+        {
             _interactionService = new Mock<IIdentityServerInteractionService>();
             _clientStore = new Mock<IClientStore>();
-            _clientStore.Setup(c => c.FindClientByIdAsync("client1")).ReturnsAsync(new Client{
+            _clientStore.Setup(c => c.FindClientByIdAsync("client1")).ReturnsAsync(new Client
+            {
                 ClientId = "client1",
                 ClientName = "Client 1"
             });
@@ -32,7 +34,8 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task RevokeConsentFireEventWithRedirect(){
+        public async Task RevokeConsentFireEventWithRedirect()
+        {
             _interactionService.Setup(i => i.RevokeUserConsentAsync("client1"))
                 .Returns(Task.CompletedTask).Verifiable();
             _eventService.Setup(e => e.RaiseAsync(It.IsAny<GrantsRevokedEvent>()))
@@ -41,8 +44,9 @@ namespace Mimoto.Tests
 
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { 
-                    User = new ClaimsPrincipal(new ClaimsIdentity(new []
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
                         {
                             new Claim("sub","user1")
                         })
@@ -58,9 +62,10 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task IndexShouldReturnEmptyModel(){      
+        public async Task IndexShouldReturnEmptyModel()
+        {
             _interactionService.Setup(i => i.GetAllUserConsentsAsync())
-                .ReturnsAsync(new Consent[]{});     
+                .ReturnsAsync(new Consent[] { });
 
             var controller = new GrantsController(_interactionService.Object, _clientStore.Object, _resourceStore.Object, _eventService.Object);
 
@@ -74,9 +79,10 @@ namespace Mimoto.Tests
 
 
         [Fact]
-        public async Task IndexShouldReturn2Models(){      
+        public async Task IndexShouldReturn2Models()
+        {
             _interactionService.Setup(i => i.GetAllUserConsentsAsync())
-                .ReturnsAsync(new []{
+                .ReturnsAsync(new[]{
                     new Consent {
                         ClientId = "client1",
                         Scopes = new [] {"api1"}
@@ -87,18 +93,18 @@ namespace Mimoto.Tests
                     }
                 });
 
-            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new [] { "api1"}))
-                .ReturnsAsync(new [] { 
-                    new IdentityResource { 
+            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new[] { "api1" }))
+                .ReturnsAsync(new[] {
+                    new IdentityResource {
                         DisplayName = "Identity 1",
                         Name = "identity1"
                     }
                 });
-            
-            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new [] { "api1"}))
-                .ReturnsAsync(new [] { 
+
+            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new[] { "api1" }))
+                .ReturnsAsync(new[] {
                     new ApiResource {
-                        Scopes = new [] { 
+                        Scopes = new [] {
                             new Scope {
                                 Name = "api1"
                             }

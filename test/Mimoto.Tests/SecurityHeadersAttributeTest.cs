@@ -11,22 +11,26 @@ using Xunit;
 
 namespace Mimoto.Tests
 {
-    public class SecurityHeadersAttrbuteTest{
+    public class SecurityHeadersAttrbuteTest
+    {
 
-        public SecurityHeadersAttrbuteTest(){
+        public SecurityHeadersAttrbuteTest()
+        {
 
         }
 
         [Fact]
-        public void ShouldAddSecureHeaders(){
+        public void ShouldAddSecureHeaders()
+        {
             var securityHeaders = new SecurityHeadersAttribute();
 
             var resultExecutingContext = new ResultExecutingContext(
-                new ActionContext(){
+                new ActionContext()
+                {
                     HttpContext = new DefaultHttpContext(),
                     RouteData = new RouteData(),
                     ActionDescriptor = new ActionDescriptor(),
-                }, 
+                },
                 new Mock<IList<IFilterMetadata>>().Object,
                 new ViewResult(),
                 new object());
@@ -39,9 +43,9 @@ namespace Mimoto.Tests
 
             responseHeaders.Should().Contain("X-Content-Type-Options", "nosniff");
             responseHeaders.Should().Contain("X-Frame-Options", "SAMEORIGIN");
-            responseHeaders.Should().Contain("Content-Security-Policy", 
+            responseHeaders.Should().Contain("Content-Security-Policy",
                 "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';");
-            responseHeaders.Should().Contain("X-Content-Security-Policy", 
+            responseHeaders.Should().Contain("X-Content-Security-Policy",
                 "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';");
             responseHeaders.Should().Contain("Referrer-Policy", "no-referrer");
         }

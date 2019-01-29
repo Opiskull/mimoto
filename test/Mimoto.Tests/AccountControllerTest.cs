@@ -29,6 +29,13 @@ namespace Mimoto.Tests
         private readonly Mock<IAuthenticationSchemeProvider> _schemeProvider;
         private readonly Mock<IEventService> _events;
 
+        private LoginInputModel _correctLogin = new LoginInputModel
+        {
+            Username = "opi",
+            Password = "opi",
+            ReturnUrl = "~/asdf"
+        };
+
         public AccountControllerTest()
         {
             _userManager = new FakeUserManager();
@@ -40,127 +47,122 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task LoginUserNamePasswordOkRedirectUrl(){
+        public async Task LoginUserNamePasswordOkRedirectUrl()
+        {
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync((AuthorizationRequest)null);
 
             var controller = CreateController();
 
-                
-            var result = await controller.Login(new LoginInputModel{ 
-                Username = "opi", 
-                Password = "opi",
-                ReturnUrl = "~/asdf"
-                },"login");
+
+            var result = await controller.Login(_correctLogin, "login");
 
             result.Should().BeAssignableTo<RedirectResult>();
-            result.As<RedirectResult>().Url.Should().Be("~/asdf");            
+            result.As<RedirectResult>().Url.Should().Be("~/asdf");
         }
 
         [Fact]
-        public async Task LoginUserNamePasswordOkReturnUrlEmpty(){
+        public async Task LoginUserNamePasswordOkReturnUrlEmpty()
+        {
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync((AuthorizationRequest)null);
 
+
+            _correctLogin.ReturnUrl = "";
+
             var controller = CreateController();
-            var result = await controller.Login(new LoginInputModel{ 
-                Username = "opi", 
-                Password = "opi",
-                ReturnUrl = ""
-                },"login");
+            var result = await controller.Login(_correctLogin, "login");
 
             result.Should().BeAssignableTo<RedirectResult>();
-            result.As<RedirectResult>().Url.Should().Be("~/");            
+            result.As<RedirectResult>().Url.Should().Be("~/");
         }
 
         [Fact]
-        public async Task LoginUserNamePasswordOkThrowsException(){
+        public async Task LoginUserNamePasswordOkThrowsException()
+        {
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync((AuthorizationRequest)null);
 
             var controller = CreateController();
 
-            Func<Task> func = async () => {
-                await controller.Login(new LoginInputModel{ 
-                Username = "opi", 
-                Password = "opi",
-                ReturnUrl = "~/invalidUrl"
-                },"login");
+            _correctLogin.ReturnUrl = "~/invalidUrl";
+
+            Func<Task> func = async () =>
+            {
+                await controller.Login(_correctLogin, "login");
             };
-            
+
             await func.Should().ThrowAsync<InvalidReturnUrlException>();
         }
 
         [Fact]
-        public async Task LoginUserNamePasswordSuccessRedirectPkce(){
+        public async Task LoginUserNamePasswordSuccessRedirectPkce()
+        {
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true,
                     RequirePkce = true
                 });
             _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginSuccessEvent>())).Returns(Task.CompletedTask).Verifiable();
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ClientId = "client1", });
+                .ReturnsAsync(new AuthorizationRequest { ClientId = "client1", });
 
             var controller = CreateController();
-            var result = await controller.Login(new LoginInputModel{ 
-                Username = "opi", 
-                Password = "opi",
-                ReturnUrl = "~/asdf"
-                },"login");
-            
+            var result = await controller.Login(_correctLogin, "login");
+
             result.Should().BeAssignableTo<ViewResult>();
             result.As<ViewResult>().ViewName.Should().Be("Redirect");
             result.As<ViewResult>().Model.As<RedirectViewModel>().RedirectUrl.Should().Be("~/asdf");
-            
+
             _events.Verify();
         }
 
         [Fact]
-        public async Task LoginUserNamePasswordSuccessRedirect(){
+        public async Task LoginUserNamePasswordSuccessRedirect()
+        {
             _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginSuccessEvent>())).Returns(Task.CompletedTask).Verifiable();
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync(new AuthorizationRequest());
 
             var controller = CreateController();
-            var result = await controller.Login(new LoginInputModel{ 
-                Username = "opi", 
-                Password = "opi",
-                ReturnUrl = "~/asdf"
-                },"login");
-            
+            var result = await controller.Login(_correctLogin, "login");
+
             result.Should().BeAssignableTo<RedirectResult>();
             result.As<RedirectResult>().Url = "~/asdf";
-            
+
             _events.Verify();
         }
 
         [Fact]
-        public async Task LoginUserNamePasswordFailed(){
+        public async Task LoginUserNamePasswordFailed()
+        {
             _events.Setup(e => e.RaiseAsync(It.IsAny<UserLoginFailureEvent>())).Returns(Task.CompletedTask).Verifiable();
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync(new AuthorizationRequest());
 
             var controller = CreateController();
-            var result = await controller.Login(new LoginInputModel{ 
-                Username = "opi1", 
+            var result = await controller.Login(new LoginInputModel
+            {
+                Username = "opi1",
                 Password = "opi"
-                },"login");
-            
+            }, "login");
+
             result.Should().BeAssignableTo<ViewResult>();
             result.As<ViewResult>().Model.Should().BeAssignableTo<LoginViewModel>();
-            
+
             _events.Verify();
         }
 
         [Fact]
-        public async Task LoginCancelButtonNoAuthorization(){
+        public async Task LoginCancelButtonNoAuthorization()
+        {
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync((AuthorizationRequest)null).Verifiable();
 
             var controller = CreateController();
 
-            var result = await controller.Login(new LoginInputModel(),"cancel");
+            var result = await controller.Login(new LoginInputModel(), "cancel");
 
             result.Should().BeAssignableTo<RedirectResult>();
             result.As<RedirectResult>().Url.Should().Be("~/");
@@ -169,33 +171,37 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task LoginCancelButton(){
+        public async Task LoginCancelButton()
+        {
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync(new AuthorizationRequest());
 
             var controller = CreateController();
 
-            var result = await controller.Login(new LoginInputModel{ ReturnUrl = "~/asdf"},"cancel");
+            var result = await controller.Login(new LoginInputModel { ReturnUrl = "~/asdf" }, "cancel");
 
             result.Should().BeAssignableTo<RedirectResult>();
             result.As<RedirectResult>().Url.Should().Be("~/asdf");
         }
 
         [Fact]
-        public async Task LoginCancelButtonPkce(){
+        public async Task LoginCancelButtonPkce()
+        {
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true,
                     RequirePkce = true
                 });
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1"
                 });
 
             var controller = CreateController();
 
-            var result = await controller.Login(new LoginInputModel{ ReturnUrl = "~/asdf"},"cancel");
+            var result = await controller.Login(new LoginInputModel { ReturnUrl = "~/asdf" }, "cancel");
 
             result.Should().BeAssignableTo<ViewResult>();
             result.As<ViewResult>().ViewName.Should().Be("Redirect");
@@ -255,15 +261,7 @@ namespace Mimoto.Tests
             var controller = CreateController();
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-                        {
-                            new Claim("sub","user1"),
-                            new Claim(JwtClaimTypes.IdentityProvider, "testIdp")
-                        }, "someAuth")
-                    )
-                }
+                HttpContext = CreateHttpContext()
             };
 
             var viewResult = await controller.Logout("blub");
@@ -285,10 +283,7 @@ namespace Mimoto.Tests
 
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = new ClaimsPrincipal(user.Object)
-                }
+                HttpContext = CreateHttpContext(new ClaimsPrincipal(user.Object))
             };
 
             var viewResult = await controller.Logout("blub");
@@ -299,15 +294,7 @@ namespace Mimoto.Tests
         [Fact]
         public async Task LogoutViewModelExternal()
         {
-            var httpContext = new DefaultHttpContext
-                {
-                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-                        {
-                            new Claim("sub","user1"),
-                            new Claim(JwtClaimTypes.IdentityProvider, "testIdp")
-                        }, "someAuth")
-                    )
-                };
+            var httpContext = CreateHttpContext();
 
             var authServiceMock = new Mock<IAuthenticationHandlerProvider>();
             authServiceMock.Setup(a => a.GetHandlerAsync(
@@ -324,7 +311,6 @@ namespace Mimoto.Tests
 
             _interaction.Setup(i => i.CreateLogoutContextAsync()).ReturnsAsync("blub");
 
-
             _events.Setup(e => e.RaiseAsync(It.IsAny<UserLogoutSuccessEvent>()))
                 .Returns(Task.CompletedTask);
             var controller = CreateController();
@@ -333,7 +319,8 @@ namespace Mimoto.Tests
                 HttpContext = httpContext,
             };
 
-            var viewResult = await controller.Logout(new LogoutInputModel(){
+            var viewResult = await controller.Logout(new LogoutInputModel
+            {
                 LogoutId = "blub"
             });
             viewResult.Should().BeAssignableTo<SignOutResult>();
@@ -349,6 +336,19 @@ namespace Mimoto.Tests
             url.Setup(u => u.Action(It.IsAny<UrlActionContext>())).Returns("Callback");
             controller.Url = url.Object;
             return controller;
+        }
+
+        private HttpContext CreateHttpContext(ClaimsPrincipal user = null)
+        {
+            return new DefaultHttpContext
+            {
+                User = user ?? new ClaimsPrincipal(new ClaimsIdentity(new[]
+                        {
+                            new Claim("sub","user1"),
+                            new Claim(JwtClaimTypes.IdentityProvider, "testIdp")
+                        }, "someAuth")
+                    )
+            };
         }
     }
 }

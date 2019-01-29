@@ -44,19 +44,23 @@ namespace Mimoto.Tests
             return Task.FromResult(Guid.NewGuid().ToString());
         }
 
-        public override Task<ApplicationUser> FindByLoginAsync(string provider, string userId){
+        public override Task<ApplicationUser> FindByLoginAsync(string provider, string userId)
+        {
             return Task.FromResult((ApplicationUser)null);
         }
 
-        public override Task<IdentityResult> AddLoginAsync(ApplicationUser user, UserLoginInfo info){
+        public override Task<IdentityResult> AddLoginAsync(ApplicationUser user, UserLoginInfo info)
+        {
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public override Task<IdentityResult> AddClaimsAsync(ApplicationUser user, IEnumerable<Claim> claims){
+        public override Task<IdentityResult> AddClaimsAsync(ApplicationUser user, IEnumerable<Claim> claims)
+        {
             return Task.FromResult(IdentityResult.Success);
         }
 
-        public override Task<ApplicationUser> FindByNameAsync(string username){
+        public override Task<ApplicationUser> FindByNameAsync(string username)
+        {
             return Task.FromResult(new ApplicationUser());
         }
 

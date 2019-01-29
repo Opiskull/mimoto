@@ -16,7 +16,8 @@ using Xunit;
 
 namespace Mimoto.Tests
 {
-    public class ConsentControllerTest{
+    public class ConsentControllerTest
+    {
 
         private readonly Mock<IIdentityServerInteractionService> _interactionService;
         private readonly Mock<IClientStore> _clientStore;
@@ -24,7 +25,8 @@ namespace Mimoto.Tests
         private readonly Mock<IEventService> _eventService;
         private readonly Mock<ILogger<ConsentController>> _logger;
 
-        public ConsentControllerTest(){
+        public ConsentControllerTest()
+        {
             _interactionService = new Mock<IIdentityServerInteractionService>();
             _clientStore = new Mock<IClientStore>();
             _resourceStore = new Mock<IResourceStore>();
@@ -33,7 +35,8 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task IndexShouldShowErrorAuthorization(){
+        public async Task IndexShouldShowErrorAuthorization()
+        {
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
                 .ReturnsAsync((AuthorizationRequest)null);
 
@@ -44,7 +47,7 @@ namespace Mimoto.Tests
         public async Task IndexShouldShowErrorClient()
         {
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ ClientId = "client1"});
+                .ReturnsAsync(new AuthorizationRequest { ClientId = "client1" });
 
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
                 .ReturnsAsync((Client)null);
@@ -53,23 +56,26 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task IndexShouldShowErrorResource(){
+        public async Task IndexShouldShowErrorResource()
+        {
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ 
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1",
-                    ScopesRequested = new [] { "api1"}
+                    ScopesRequested = new[] { "api1" }
                 });
 
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true
                 });
 
-            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new [] { "api1"}))
-                .ReturnsAsync(new IdentityResource [] {
+            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new[] { "api1" }))
+                .ReturnsAsync(new IdentityResource[] {
                 });
-            
-            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new [] { "api1"}))
+
+            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new[] { "api1" }))
                 .ReturnsAsync(new ApiResource[] {
                 });
 
@@ -77,32 +83,35 @@ namespace Mimoto.Tests
         }
 
         [Fact]
-        public async Task ShouldDisplayConsentViewModel(){
-            var scopes = new [] { "api1", IdentityServerConstants.StandardScopes.OfflineAccess};
+        public async Task ShouldDisplayConsentViewModel()
+        {
+            var scopes = new[] { "api1", IdentityServerConstants.StandardScopes.OfflineAccess };
 
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ 
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1",
                     ScopesRequested = scopes
                 });
 
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true,
                 });
 
             _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(scopes))
-                .ReturnsAsync(new [] { 
-                    new IdentityResource { 
+                .ReturnsAsync(new[] {
+                    new IdentityResource {
                         DisplayName = "Identity 1",
                         Name = "identity1"
                     }
                 });
-            
+
             _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(scopes))
-                .ReturnsAsync(new [] { 
+                .ReturnsAsync(new[] {
                     new ApiResource {
-                        Scopes = new [] { 
+                        Scopes = new [] {
                             new Scope {
                                 Name = "api1"
                             }
@@ -125,7 +134,7 @@ namespace Mimoto.Tests
                 .ReturnsAsync((AuthorizationRequest)null);
 
             var controller = CreateController();
-            
+
             var result = await controller.Index(new ConsentInputModel());
 
             result.As<ViewResult>().ViewName.Should().Be("Error");
@@ -138,17 +147,19 @@ namespace Mimoto.Tests
             consentModel.Button = "no";
             consentModel.ReturnUrl = "returnUrl";
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ 
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1",
-                    ScopesRequested = new [] { "api1"}
+                    ScopesRequested = new[] { "api1" }
                 });
-            
+
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true,
                     RequirePkce = true
                 });
-            
+
             _eventService.Setup(e => e.RaiseAsync(It.IsAny<ConsentDeniedEvent>()))
                 .Returns(Task.CompletedTask).Verifiable();
 
@@ -170,28 +181,30 @@ namespace Mimoto.Tests
             consentModel.Button = "invalid";
             consentModel.ReturnUrl = "returnUrl";
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ 
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1",
-                    ScopesRequested = new [] { "api1"}
+                    ScopesRequested = new[] { "api1" }
                 });
-            
+
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true
                 });
 
-            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new [] { "api1"}))
-                .ReturnsAsync(new [] { 
-                    new IdentityResource { 
+            _resourceStore.Setup(r => r.FindIdentityResourcesByScopeAsync(new[] { "api1" }))
+                .ReturnsAsync(new[] {
+                    new IdentityResource {
                         DisplayName = "Identity 1",
                         Name = "identity1"
                     }
                 });
-            
-            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new [] { "api1"}))
-                .ReturnsAsync(new [] { 
+
+            _resourceStore.Setup(r => r.FindApiResourcesByScopeAsync(new[] { "api1" }))
+                .ReturnsAsync(new[] {
                     new ApiResource {
-                        Scopes = new [] { 
+                        Scopes = new [] {
                             new Scope {
                                 Name = "api1"
                             }
@@ -214,18 +227,20 @@ namespace Mimoto.Tests
             var consentModel = new ConsentInputModel();
             consentModel.Button = "yes";
             consentModel.ReturnUrl = "returnUrl";
-            consentModel.ScopesConsented = new [] {"api1"};
+            consentModel.ScopesConsented = new[] { "api1" };
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ 
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1",
-                    ScopesRequested = new [] { "api1"}
+                    ScopesRequested = new[] { "api1" }
                 });
-            
+
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true
                 });
-            
+
             _eventService.Setup(e => e.RaiseAsync(It.IsAny<ConsentGrantedEvent>()))
                 .Returns(Task.CompletedTask).Verifiable();
 
@@ -247,13 +262,15 @@ namespace Mimoto.Tests
             consentModel.Button = "yes";
             consentModel.ReturnUrl = "returnUrl";
             _interactionService.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync(new AuthorizationRequest{ 
+                .ReturnsAsync(new AuthorizationRequest
+                {
                     ClientId = "client1",
-                    ScopesRequested = new [] { "api1"}
+                    ScopesRequested = new[] { "api1" }
                 });
-            
+
             _clientStore.Setup(c => c.FindClientByIdAsync("client1"))
-                .ReturnsAsync(new Client{
+                .ReturnsAsync(new Client
+                {
                     Enabled = true
                 });
 
@@ -267,13 +284,15 @@ namespace Mimoto.Tests
             result.As<ViewResult>().ViewName.Should().Be("Error");
         }
 
-        private ConsentController CreateController(){
-            var controller = new ConsentController(_interactionService.Object, _clientStore.Object, 
+        private ConsentController CreateController()
+        {
+            var controller = new ConsentController(_interactionService.Object, _clientStore.Object,
                                     _resourceStore.Object, _eventService.Object, _logger.Object);
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { 
-                    User = new ClaimsPrincipal(new ClaimsIdentity(new []
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(new[]
                         {
                             new Claim("sub","user1")
                         })
@@ -283,7 +302,8 @@ namespace Mimoto.Tests
             return controller;
         }
 
-        private async Task ShouldShowError(){
+        private async Task ShouldShowError()
+        {
             var controller = CreateController();
 
             var viewResult = await controller.Index("~/");
