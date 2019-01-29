@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IdentityModel;
@@ -66,7 +67,6 @@ namespace Mimoto.Tests
         [Fact]
         public async Task CallbackShouldThrowException()
         {
-
             var controller = createController();
 
             controller.ControllerContext = new ControllerContext
@@ -82,7 +82,6 @@ namespace Mimoto.Tests
         [Fact]
         public async Task CallbackFindShouldThrowException()
         {
-
             var controller = createController();
 
             controller.ControllerContext = new ControllerContext
@@ -166,6 +165,32 @@ namespace Mimoto.Tests
 
             result.Should().BeAssignableTo<RedirectResult>();
             result.As<RedirectResult>().Url.Should().Be("~/asdf");
+        }
+
+        // We cannot test Windows with Linux
+        [Fact]
+        public async Task ChallengeWindows()
+        {
+            _interaction.Setup(i => i.IsValidReturnUrl("~/")).Returns(true);
+
+            var controller = createController();
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
+                               new AuthenticationTicket(
+                                   // We cannot test WindowsPrincipal under Linux
+                                   // new WindowsPrincipal(WindowsIdentity.GetAnonymous()),
+                                   new ClaimsPrincipal(),
+                                   new AuthenticationProperties(new Dictionary<string, string>(){
+                            {"scheme","test"},
+                            {"returnUrl","~/asdf"}
+                                   }),
+                                   AccountOptions.WindowsAuthenticationSchemeName)
+                               )
+                           )
+            };
+            await controller.Challenge(AccountOptions.WindowsAuthenticationSchemeName, "~/");
         }
 
         private ExternalController createController()
