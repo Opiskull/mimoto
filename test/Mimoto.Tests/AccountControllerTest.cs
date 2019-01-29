@@ -10,12 +10,10 @@ using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Mimoto.Exceptions;
-using Mimoto.Models;
 using Mimoto.Quickstart.Account;
 using Moq;
 using Xunit;
@@ -91,7 +89,6 @@ namespace Mimoto.Tests
             };
             
             await func.Should().ThrowAsync<InvalidReturnUrlException>();
-            
         }
 
         [Fact]
@@ -159,7 +156,7 @@ namespace Mimoto.Tests
         [Fact]
         public async Task LoginCancelButtonNoAuthorization(){
             _interaction.Setup(i => i.GetAuthorizationContextAsync(It.IsAny<string>()))
-                .ReturnsAsync((AuthorizationRequest)null);
+                .ReturnsAsync((AuthorizationRequest)null).Verifiable();
 
             var controller = CreateController();
 
@@ -167,6 +164,8 @@ namespace Mimoto.Tests
 
             result.Should().BeAssignableTo<RedirectResult>();
             result.As<RedirectResult>().Url.Should().Be("~/");
+
+            _interaction.Verify();
         }
 
         [Fact]
@@ -217,9 +216,9 @@ namespace Mimoto.Tests
 
             var redirectToAction = await controller.Login("~/");
 
-            redirectToAction.Should().BeAssignableTo<RedirectToActionResult>();
-            redirectToAction.As<RedirectToActionResult>().ControllerName.Should().Be("External");
-            redirectToAction.As<RedirectToActionResult>().ActionName.Should().Be("Challenge");
+            var result = redirectToAction.Should().BeAssignableTo<RedirectToActionResult>().As<RedirectToActionResult>();
+            result.ControllerName.Should().Be("External");
+            result.ActionName.Should().Be("Challenge");
         }
 
         [Fact]
@@ -276,7 +275,6 @@ namespace Mimoto.Tests
         [Fact]
         public async Task LogoutWithoutUser()
         {
-
             _interaction.Setup(i => i.GetLogoutContextAsync("blub"))
                 .ReturnsAsync(new LogoutRequest("iframeurl", new LogoutMessage()));
             var user = new Mock<IIdentity>();
