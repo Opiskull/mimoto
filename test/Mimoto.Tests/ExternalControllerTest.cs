@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Mimoto.Exceptions;
+using Mimoto.Quickstart;
 using Mimoto.Quickstart.Account;
 using Moq;
 using Xunit;
@@ -27,6 +28,7 @@ namespace Mimoto.Tests
         private readonly FakeSignInManager _signInManager;
         private readonly Mock<IIdentityServerInteractionService> _interaction;
         private readonly Mock<IEventService> _events;
+        private readonly Mock<IWindowsPrincipalProvider> _windowsProvider;
         public ExternalControllerTest()
         {
             _userManager = new FakeUserManager();
@@ -35,6 +37,9 @@ namespace Mimoto.Tests
             _interaction.Setup(i => i.IsValidReturnUrl("http://localhost")).Returns(false);
             _interaction.Setup(i => i.IsValidReturnUrl("~/")).Returns(true);
             _events = new Mock<IEventService>();
+            _windowsProvider = new Mock<IWindowsPrincipalProvider>();
+            _windowsProvider.Setup(w => w.IsWindowsPrincipal(It.IsAny<ClaimsPrincipal>())).Returns(true);
+            _windowsProvider.Setup(w => w.Groups(It.IsAny<IIdentity>())).Returns(new List<Claim>());
         }
 
         [Fact]
@@ -179,9 +184,9 @@ namespace Mimoto.Tests
             {
                 HttpContext = AuthenticatedHttpContext(AuthenticateResult.Success(
                                new AuthenticationTicket(
-                                   // We cannot test WindowsPrincipal under Linux
-                                   // new WindowsPrincipal(WindowsIdentity.GetAnonymous()),
-                                   new ClaimsPrincipal(),
+                        new System.Security.Claims.ClaimsPrincipal(
+                            Mock.Of<IIdentity>(i => i.Name == "opi")
+                        ),
                                    new AuthenticationProperties(new Dictionary<string, string>(){
                             {"scheme","test"},
                             {"returnUrl","~/asdf"}
@@ -195,7 +200,7 @@ namespace Mimoto.Tests
 
         private ExternalController createController()
         {
-            var controller = new ExternalController(_userManager, _signInManager, _interaction.Object, _events.Object);
+            var controller = new ExternalController(_userManager, _signInManager, _interaction.Object, _events.Object, _windowsProvider.Object);
             var url = new Mock<IUrlHelper>();
             url.Setup(u => u.IsLocalUrl("http://localhost")).Returns(false);
             url.Setup(u => u.IsLocalUrl("~/")).Returns(true);

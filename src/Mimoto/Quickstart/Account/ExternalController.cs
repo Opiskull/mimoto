@@ -27,17 +27,20 @@ namespace Mimoto.Quickstart.Account
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
+        private readonly IWindowsPrincipalProvider _windowsPrincipalProvider;
 
         public ExternalController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IIdentityServerInteractionService interaction,
-            IEventService events)
+            IEventService events,
+            IWindowsPrincipalProvider windowsPrincipalProvider)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _interaction = interaction;
             _events = events;
+            _windowsPrincipalProvider = windowsPrincipalProvider;
         }
 
         /// <summary>
@@ -136,8 +139,9 @@ namespace Mimoto.Quickstart.Account
         {
             // see if windows auth has already been requested and succeeded
             var result = await HttpContext.AuthenticateAsync(AccountOptions.WindowsAuthenticationSchemeName);
-            if (result?.Principal is WindowsPrincipal wp)
+            if (result?.Principal != null && _windowsPrincipalProvider.IsWindowsPrincipal(result.Principal))
             {
+                var wp = result.Principal;
                 // we will issue the external cookie and then redirect the
                 // user back to the external callback, in essence, treating windows
                 // auth the same as any other external authentication mechanism
@@ -158,9 +162,7 @@ namespace Mimoto.Quickstart.Account
                 // add the groups as claims -- be careful if the number of groups is too large
                 if (AccountOptions.IncludeWindowsGroups)
                 {
-                    var wi = wp.Identity as WindowsIdentity;
-                    var groups = wi.Groups.Translate(typeof(NTAccount));
-                    var roles = groups.Select(x => new Claim(JwtClaimTypes.Role, x.Value));
+                    var roles = _windowsPrincipalProvider.Groups(wp.Identity);
                     id.AddClaims(roles);
                 }
 

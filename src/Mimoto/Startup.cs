@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Mimoto.Database;
 using Mimoto.Models;
+using Mimoto.Quickstart;
 
 namespace Mimoto
 {
@@ -74,6 +75,8 @@ namespace Mimoto
                 .AddIfExists("facebook", (p, a, c) => a.AddFacebook(p, c))
                 .AddIfExists("microsoft", (p, a, c) => a.AddMicrosoftAccount(p, c))
                 .AddIfExists("github", (p, a, c) => a.AddGitHub(p, c));
+            
+            services.AddSingleton<IWindowsPrincipalProvider, WindowsPrincipalProvider>();
         }
 
         public void Configure(IApplicationBuilder app)
