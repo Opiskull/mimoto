@@ -25,12 +25,12 @@ namespace Mimoto.Tests
         public void ShouldFindTestUserClaimTypes()
         {
             var result = new[]{
-                new Claim(ClaimTypes.GivenName, "test"),
-                new Claim(ClaimTypes.Surname, "user"),
-                new Claim(ClaimTypes.Email, "test@user.com")
+                new Claim(ClaimTypes.GivenName, "test1"),
+                new Claim(ClaimTypes.Surname, "user1"),
+                new Claim(ClaimTypes.Email, "test1@user1.com")
             }.GetNameAndEmailClaims();
-            result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Name, "test user"));
-            result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Email, "test@user.com"));
+            result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Name, "test1 user1"));
+            result.Should().ContainEquivalentOf(new Claim(JwtClaimTypes.Email, "test1@user1.com"));
         }
 
         [Fact]
