@@ -123,7 +123,7 @@ namespace Mimoto.Tests
                                 new Claim(JwtClaimTypes.Name, "test1")
                             }
                         )),
-                        new AuthenticationProperties(new Dictionary<string, string>(){
+                        new AuthenticationProperties(new Dictionary<string, string>{
                             {"scheme","test"},
                             {"returnUrl","~/asdf"}
                         }),
@@ -157,7 +157,7 @@ namespace Mimoto.Tests
                                 new Claim(JwtClaimTypes.Name, "test1")
                             }
                         )),
-                        new AuthenticationProperties(new Dictionary<string, string>(){
+                        new AuthenticationProperties(new Dictionary<string, string>{
                             {"scheme","test"},
                             {"returnUrl","~/asdf"}
                         }),
@@ -187,7 +187,7 @@ namespace Mimoto.Tests
                         new System.Security.Claims.ClaimsPrincipal(
                             Mock.Of<IIdentity>(i => i.Name == "opi")
                         ),
-                                   new AuthenticationProperties(new Dictionary<string, string>(){
+                                   new AuthenticationProperties(new Dictionary<string, string>{
                             {"scheme","test"},
                             {"returnUrl","~/asdf"}
                                    }),

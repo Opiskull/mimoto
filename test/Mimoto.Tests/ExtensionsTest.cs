@@ -9,11 +9,6 @@ namespace Mimoto.Tests
 {
     public class ExtensionsTest
     {
-        public ExtensionsTest()
-        {
-
-        }
-
         [Fact]
         public void ShouldFindTestUserJwtClaimTypes()
         {
