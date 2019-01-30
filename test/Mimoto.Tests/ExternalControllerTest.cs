@@ -204,7 +204,7 @@ namespace Mimoto.Tests
             return controller;
         }
 
-        private HttpContext AuthenticatedHttpContext(AuthenticateResult result)
+        private static HttpContext AuthenticatedHttpContext(AuthenticateResult result)
         {
             var httpContext = new DefaultHttpContext();
 

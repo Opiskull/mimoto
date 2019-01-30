@@ -29,7 +29,7 @@ namespace Mimoto.Tests
         private readonly Mock<IAuthenticationSchemeProvider> _schemeProvider;
         private readonly Mock<IEventService> _events;
 
-        private LoginInputModel _correctLogin = new LoginInputModel
+        private readonly LoginInputModel _correctLogin = new LoginInputModel
         {
             Username = "opi",
             Password = "opi",
@@ -338,7 +338,7 @@ namespace Mimoto.Tests
             return controller;
         }
 
-        private HttpContext CreateHttpContext(ClaimsPrincipal user = null)
+        private static HttpContext CreateHttpContext(ClaimsPrincipal user = null)
         {
             return new DefaultHttpContext
             {

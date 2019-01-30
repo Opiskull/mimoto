@@ -13,19 +13,13 @@ namespace Mimoto.Tests
 {
     public class SecurityHeadersAttrbuteTest
     {
-
-        public SecurityHeadersAttrbuteTest()
-        {
-
-        }
-
         [Fact]
         public void ShouldAddSecureHeaders()
         {
             var securityHeaders = new SecurityHeadersAttribute();
 
             var resultExecutingContext = new ResultExecutingContext(
-                new ActionContext()
+                new ActionContext
                 {
                     HttpContext = new DefaultHttpContext(),
                     RouteData = new RouteData(),
